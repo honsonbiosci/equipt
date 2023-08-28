@@ -185,7 +185,7 @@ def deltact(ct_data,
     
     '''
     # Check for dilution
-    if dilution == False:
+    if dilution == None:
         pass
     else:
         ct_data['Dilutions'] = [int(i.split('_')[-1]) for i in ct_data['Name']]
