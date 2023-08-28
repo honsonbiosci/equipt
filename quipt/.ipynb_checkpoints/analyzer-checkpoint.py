@@ -187,12 +187,12 @@ def deltact(ct_data,
     # Check for dilution
     if dilution == None:
         pass
-    #else:
-    #    dil_ls = [i.split('_') for i in ct_data['Name']]
-    #    ct_data['Dilutions'] = [int(i[-1]) for i in dil_ls]
-    #    ct_data['Name'] = [''.join(i) for i in dil_ls]
+    else:
+        dil_ls = [i.split('_') for i in ct_data['Name']]
+        ct_data['Dilutions'] = [int(i[-1]) for i in dil_ls]
+        ct_data['Name'] = [''.join(i) for i in dil_ls]
         
-     #   ct_data = ct_data[ct_data['Dilutions'] == dilution]
+        ct_data = ct_data[ct_data['Dilutions'] == dilution]
         
     # Check incompatible settings 
     if exp_ctrl == None and foldchange == True:
