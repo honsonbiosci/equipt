@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 
-with open("quipt/__init__.py", "r") as f:
+with open("equipt/__init__.py", "r") as f:
     init = f.readlines()
 
 for line in init:
@@ -18,7 +18,7 @@ for line in init:
 
 
 setup(
-    name='quipt',
+    name='equipt',
     version=__version__,
     author=__author__,
     author_email=__email__,
