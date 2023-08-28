@@ -188,8 +188,11 @@ def deltact(ct_data,
     if dilution == None:
         pass
     else:
-        ct_data['Dilutions'] = [int(i.split('_')[-1]) for i in ct_data['Name']]
-        ct_data = ct_data[ct_data['Dilutions'] == dilution]
+        dil_ls = [i.split('_') for i in ct_data['Name']]
+	ct_data['Dilutions'] = [int(i[-1]) for i in dil_ls]
+	ct_data['Name'] = [''.join(i) for i in dil_ls]
+        
+	ct_data = ct_data[ct_data['Dilutions'] == dilution]
         
     # Check incompatible settings 
     if exp_ctrl == None and foldchange == True:
@@ -294,8 +297,8 @@ def deltact(ct_data,
         # Loop through primers
         for p in dct_prims:
             # Identify indices
-            e_prim = e + '_' + str(dilution)+ p
-            c_prim = c + '_' + str(dilution) + p
+            e_prim = e + p
+            c_prim = c + p
             
             # Calculate ddCt and propagate error
             ddct = dct_df.loc[e_prim,'dCt'] - dct_df.loc[c_prim,'dCt']
@@ -320,6 +323,7 @@ def deltact(ct_data,
     
     # Return dataframe
     return ddct_df
+
 def efficiency(ct_in, # output from namer
               with_dil,
               returnmodel=False, # Whether or not to output the linear model in full
