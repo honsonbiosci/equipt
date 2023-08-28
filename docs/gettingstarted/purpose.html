@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Purpose and contents &mdash; quipt 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            quipt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Purpose and contents</a><ul>
+<li><a class="reference internal" href="#tools">Tools</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">quipt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Purpose and contents</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/gettingstarted/purpose.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="purpose-and-contents">
+<h1>Purpose and contents<a class="headerlink" href="#purpose-and-contents" title="Permalink to this heading"></a></h1>
+<p>Equipt is a collection of tools for analyzing quantitative PCR data. Why use equipt? The software associated with many qPCR thermocyclers often contains analysis tools. Some functions such as Ct calling and melting curve analysis rely on the raw fluorometric measurements and are practically identical for every experiment. As such, it makes sense for the instrument-associated software to perform these calculations.</p>
+<p>After these values are calculated, however, the analysis must be highly specific to the experiment. qPCR machine software usually solves the problem with a point and click approach to labeling wells which is tedious and not reproducible. As such, I know hardly anyone who uses those tools. Instead, most people take their Ct values to Excel, <a href="#id1"><span class="problematic" id="id2">`where errors are frequent and difficult to detect.&lt;https://theconversation.com/excel-autocorrect-errors-still-plague-genetic-research-raising-concerns-over-scientific-rigour-166554#:~:text=Our%20research%20shows%20autocorrect%20errors,gene%20name%20mangled%20by%20autocorrect.&gt;`_</span></a></p>
+<p>Equipt solves these problems by:</p>
+<ol class="arabic simple">
+<li><p>Enforcing a set of standardized layouts for 96- or 384-well plates.</p></li>
+<li><p>Reproducibly labeling wells such that errors are easily detected.</p></li>
+<li><p>Having explicit, user-specified definitions of outliers for dropping replicate wells.</p></li>
+<li><p>Leveraging the above standardizations in functions for common qPCR analyses.</p></li>
+</ol>
+<p>Using equipt will make your qPCR analysis mostly painless and entirely reproducible.</p>
+<section id="tools">
+<h2>Tools<a class="headerlink" href="#tools" title="Permalink to this heading"></a></h2>
+<p>Currently equipt has four main tools:</p>
+<ul class="simple">
+<li><p>namer : Labels samples, primers, and dilutions (if applicable) on qPCR outputs. Provides a standardized input for all other functions.</p></li>
+<li><p>avg_filt : Averages replicates and calculates standard deviation. If desired, avg_filt will remove outliers (specified by a maximum acceptable standard deviation) from groups of replicate wells and report how many wells it excluded from each group of replicate wells.</p></li>
+<li><p>efficiency : Calculates qPCR primer efficiency from a standard curve.</p></li>
+<li><p>deltact : Performs ΔCt, ΔΔCt, and/or fold-change analysis for differential gene expression or enrichment analysis.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Drew Honson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
