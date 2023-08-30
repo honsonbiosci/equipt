@@ -12,6 +12,7 @@ Welcome to equipt's documentation!
 
    gettingstarted/installation
    gettingstarted/purpose
+   gettingstarted/platesetup
 
 .. toctree::
    :maxdepth: 1
