@@ -9,6 +9,17 @@ from sklearn.metrics import r2_score
 import bokeh.plotting as plt
 from bokeh.layouts import gridplot
 
+import pandas as pd
+import numpy as np
+
+from itertools import chain
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+
+import bokeh.plotting as plt
+from bokeh.layouts import gridplot
+
 def averager(ct_data):
     '''
     Computes average Ct values and errors for sample-primer pairs
@@ -51,6 +62,7 @@ def averager(ct_data):
     return avgdf
 
 def avg_filt(ct_data,
+             reps,
              thresh=0.1):
     '''
     Runs averager and removes divergent replicate wells. Wells are removed 
@@ -123,10 +135,22 @@ def avg_filt(ct_data,
         pass
     else:
         dropped = list(chain.from_iterable(dropped))
-        drop_txt = []
+        drop_txt = ['Outlier Wells Dropped:\n']
+        drop_dict = {}
 
         for i in dropped:
-            drop_txt.append(i + ' - ' + str(dropped.count(i)) + '\n')
+            drop_dict[i] = dropped.count(i)
+            drop_txt.append(i + ' - ' + str(drop_dict[i]) + '\n')
+        
+        drop_txt.append('\n')
+        drop_txt.append('Samples Removed:' + '\n')
+        
+        for i in drop_dict:
+            if drop_dict[i] >= 0.5*reps:
+                avg = avg[avg['NamePrim'] != i]
+                drop_txt.append(i + '\n')
+            else:
+                pass
             
         with open('droppedWells.txt', 'w') as f:
              f.writelines(drop_txt)
@@ -135,7 +159,7 @@ def avg_filt(ct_data,
 
 def deltact(ct_data,
             housekeeping,
-            primers,
+            reps,
             dilution=None,
             thresh=0.1,
             exp_ctrl=None,
@@ -154,8 +178,8 @@ def deltact(ct_data,
     housekeeping : list
         A list of housekeeping primers.
         
-    primers : list
-        A list of all primers.
+    reps : int
+        The number of replicate wells per sample-primer pair in the experiment.
         
     dilution : int or None
         If all samples have the same dilution factor, set to None. If samples
@@ -184,6 +208,9 @@ def deltact(ct_data,
         A Pandas DataFrame containing the specified calculations.
     
     '''
+    # Create log file
+    log = open('deltaCtLog.out','a')
+    
     # Check for dilution
     if dilution == None:
         pass
@@ -201,7 +228,7 @@ def deltact(ct_data,
         pass
     
     # Compute averages 
-    avgdf = avg_filt(ct_data,thresh=thresh)
+    avgdf = avg_filt(ct_data,reps,thresh=thresh)
         
     # Check for appropriate housekeeping controls
     if len(housekeeping) == 1:
@@ -209,7 +236,9 @@ def deltact(ct_data,
                     \n Do you want to proceed? [Y/N]''')
         
         if ask == 'Y':
-            print('Proceeding with delta delta Ct analysis.')
+            log.write('Proceeded with only one housekeeping gene \n')
+            log.write('\n')
+            print('Proceeding with delta Ct analysis.')
             
         elif ask == 'N':
             return print('Analysis canceled.')
@@ -224,22 +253,30 @@ def deltact(ct_data,
     # Batch together housekeeping genes
     names = np.unique(avgdf['Name'])
     
+    log.write('Samples removed because housekeeping sample did not pass threshold:')
+    
     for n in names:
         subdf = avgdf[avgdf['Name']==n]
         subdf = subdf[subdf['Primer'].isin(housekeeping)]
-
-        errorprop = 0.5 * np.sqrt(np.sum([i**2 for i in subdf['StdCt']]))
-
-        series = pd.Series({'Name':n,
-                           'Primer':'housekeeping',
-                           'AvgCt':np.mean(subdf['AvgCt']),
-                           'StdCt':errorprop
-                               })
-
-        avgdf = pd.concat([avgdf,series.to_frame().T],ignore_index=True)
         
-    # Calculate delta Ct values (experimental - housekeeping)
-    exp_genes = len(primers) - len(housekeeping)
+        # Drop samples where housekeeping genes did not pass threshold
+        if len(subdf) < len(housekeeping):
+            log.write('\n' + n)
+            avgdf = avgdf[avgdf['Name'] != n]
+        
+        else:
+            errorprop = 0.5 * np.sqrt(np.sum([i**2 for i in subdf['StdCt']]))
+
+            series = pd.Series({'Name':n,
+                               'Primer':'housekeeping',
+                               'AvgCt':np.mean(subdf['AvgCt']),
+                               'StdCt':errorprop
+                                   })
+
+            avgdf = pd.concat([avgdf,series.to_frame().T],ignore_index=True)
+    
+    # Regenerate names list after filtering
+    names = np.unique(avgdf['Name'])
     
     # Make dictionary of empty lists
     dct_dict = {'Name':[],
@@ -248,12 +285,17 @@ def deltact(ct_data,
                'StdErr':[]}
     
     for i, n in enumerate(names):
-        # Subset df and make primer loc-able
+        # Subset df
         subdf = avgdf[avgdf['Name']==n]
+        
+        # Generate primers list and reset index
+        primers = np.unique(subdf['Primer'])
         subdf.set_index('Primer',inplace=True)
         
         for p in primers:
             if p in housekeeping:
+                pass
+            elif p == 'housekeeping':
                 pass
             else:
                 # Calculate dCt and propagate error
@@ -273,6 +315,11 @@ def deltact(ct_data,
         return dct_df
     else:
         pass
+    
+    # Update log to keep track of ddCt analysis
+    log.write('\nSamples dropped due to avgfilt thresholding:\n')
+    
+    log.write('\nPrimer\tExperimental\tControl')
     
     # Set index to nameprim for easy location
     dct_df['NamePrim'] = dct_df['Name'] + dct_df['Primer']
@@ -300,17 +347,24 @@ def deltact(ct_data,
             e_prim = e + p
             c_prim = c + p
             
-            # Calculate ddCt and propagate error
-            ddct = dct_df.loc[e_prim,'dCt'] - dct_df.loc[c_prim,'dCt']
-            err = np.sqrt(dct_df.loc[e_prim,'StdErr']**2 + dct_df.loc[c_prim,'StdErr']**2)
+            # Check that both still exist
+            ind_ls = [i in dct_df.index for i in [e_prim,c_prim]]
             
-            # Update dictionary
-            ddct_dict['Experimental'].append(e)
-            ddct_dict['Control'].append(c)
-            ddct_dict['Primer'].append(p)
-            ddct_dict['Exp dCt'].append(dct_df.loc[e_prim,'dCt'])
-            ddct_dict['ddCt'].append(ddct)
-            ddct_dict['StdErr'].append(err)
+            if all(ind_ls):
+                # Calculate ddCt and propagate error
+                ddct = dct_df.loc[e_prim,'dCt'] - dct_df.loc[c_prim,'dCt']
+                err = np.sqrt(dct_df.loc[e_prim,'StdErr']**2 + dct_df.loc[c_prim,'StdErr']**2)
+
+                # Update dictionary
+                ddct_dict['Experimental'].append(e)
+                ddct_dict['Control'].append(c)
+                ddct_dict['Primer'].append(p)
+                ddct_dict['Exp dCt'].append(dct_df.loc[e_prim,'dCt'])
+                ddct_dict['ddCt'].append(ddct)
+                ddct_dict['StdErr'].append(err)
+                
+            else:
+                log.write('\n'+p+'\t'+e+'\t'+c+'\t')
             
     # Convert dictionary to dataframe
     ddct_df = pd.DataFrame(ddct_dict)
