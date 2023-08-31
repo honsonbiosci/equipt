@@ -130,7 +130,6 @@ def namer(ct_file,
                 update_ls.append('_'.join([i,str(kwargs['dil_rest'])]))
         
         samples = update_ls
-        print(samples)
         
     else:
         pass
