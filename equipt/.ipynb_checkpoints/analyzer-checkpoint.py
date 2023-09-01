@@ -20,7 +20,7 @@ from sklearn.metrics import r2_score
 import bokeh.plotting as plt
 from bokeh.layouts import gridplot
 
-def averager(ct_data):
+def avg_base(ct_data):
     '''
     Computes average Ct values and errors for sample-primer pairs
     from namer output
@@ -61,11 +61,12 @@ def averager(ct_data):
         
     return avgdf
 
-def avg_filt(ct_data,
+def averager(ct_data,
              reps,
-             thresh=0.1):
+             thresh=0.1,
+             update_data=False):
     '''
-    Runs averager and removes divergent replicate wells. Wells are removed 
+    Runs avg_base and removes divergent replicate wells. Wells are removed 
     until each sample-primer pair has a standard deviation less than or equal
     to a user-specified threshold.
     
@@ -75,9 +76,17 @@ def avg_filt(ct_data,
     ct_data : a dataframe
         Output of namer().
         
-    thresh : float
+    reps : int
+        The number of replicate wells in the sample. Used to flag sample-
+        primer pairs where more than half the wells have been removed. Is
+        not used if thresh == None.
+
+    thresh : float or None
         Highest acceptable standard deviation for a set of sample-primer
-        replicate wells. Default 0.1
+        replicate wells. If set to None no wells are removed. Default 0.1
+        
+    update_data : Bool
+        Whether to alter the input dataframe in place or to leave it unaffected.
         
     Returns
     _______
@@ -97,7 +106,7 @@ def avg_filt(ct_data,
     dropped = []
     
     while x == 0:
-        avg = averager(ct_data)
+        avg = avg_base(ct_data)
         
         if thresh == None:
             x += 1
@@ -129,7 +138,10 @@ def avg_filt(ct_data,
                 subtract = np.argmax(subtract)
                 subtract = filtdf.iloc[subtract]['index']
                 
-                ct_data = ct_data.drop(subtract)
+                if update_data == False:
+                    ct_data = ct_data.drop(subtract)
+                else:
+                    ct_data.drop(subtract,inplace=True)
     
     if len(dropped) == 0:
         pass

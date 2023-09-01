@@ -63,7 +63,8 @@ def avg_base(ct_data):
 
 def averager(ct_data,
              reps,
-             thresh=0.1):
+             thresh=0.1,
+             update_data=False):
     '''
     Runs avg_base and removes divergent replicate wells. Wells are removed 
     until each sample-primer pair has a standard deviation less than or equal
@@ -83,6 +84,9 @@ def averager(ct_data,
     thresh : float or None
         Highest acceptable standard deviation for a set of sample-primer
         replicate wells. If set to None no wells are removed. Default 0.1
+        
+    update_data : Bool
+        Whether to alter the input dataframe in place or to leave it unaffected.
         
     Returns
     _______
@@ -134,7 +138,10 @@ def averager(ct_data,
                 subtract = np.argmax(subtract)
                 subtract = filtdf.iloc[subtract]['index']
                 
-                ct_data = ct_data.drop(subtract)
+                if update_data == False:
+                    ct_data = ct_data.drop(subtract)
+                else:
+                    ct_data.drop(subtract,inplace=True)
     
     if len(dropped) == 0:
         pass
