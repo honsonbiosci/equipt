@@ -24,10 +24,9 @@ setup(
     author_email=__email__,
     description='A suite of tools for quantitative PCR analysis',
     long_description=long_description,
-    long_description_content_type='ext/markdown',
+    long_description_content_type='text/markdown',
     packages=find_packages(),
-    classifiers=(
+    classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
-    ),
-)
+    ],)
