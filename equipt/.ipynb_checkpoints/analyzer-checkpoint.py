@@ -444,7 +444,7 @@ def efficiency(ct_in, # output from namer
     
     # Filter outlier wells
     if kwargs:
-        averager(ct_data,reps,thresh=thresh,update_data=True)
+        averager(ct_data,kwargs['reps'],thresh=kwargs['thresh'],update_data=True)
     else:
         pass
     
