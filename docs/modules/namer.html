@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>namer() &mdash; equipt 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="averager()" href="averager.html" />
+    <link rel="prev" title="Plate Set-Up" href="../gettingstarted/platesetup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            equipt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/purpose.html">Purpose and contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted/platesetup.html">Plate Set-Up</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">namer()</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Using-namer()-for-the-Lightcycler-480">Using <code class="docutils literal notranslate"><span class="pre">namer()</span></code> for the Lightcycler 480</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-a-custom-importer-function-with-namer()">Using a custom importer function with <code class="docutils literal notranslate"><span class="pre">namer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Important-Caveats">Important Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="averager.html"><code class="docutils literal notranslate"><span class="pre">averager()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="efficiency.html"><code class="docutils literal notranslate"><span class="pre">efficiency()</span></code></a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">equipt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="docutils literal notranslate"><span class="pre">namer()</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/namer.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="namer()">
+<h1><code class="docutils literal notranslate"><span class="pre">namer()</span></code><a class="headerlink" href="#namer()" title="Permalink to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">namer()</span></code> is the function that imports qPCR data and labels wells. The output of <code class="docutils literal notranslate"><span class="pre">namer()</span></code> is used for all subsequent equipt functions.</p>
+<p>The first step of <code class="docutils literal notranslate"><span class="pre">namer()</span></code> is a function that imports the Ct values from an .xlsx or .csv file. In the current distribution this is performed by the function <code class="docutils literal notranslate"><span class="pre">lc480_importer()</span></code>, which is specific to the data output of the Roche LightCycler 480. For other instruments and file formats the user can write their own importer and supply it to namer. The only requirements are that it outputs a Pandas Dataframe with one column named ‘Pos’ that contains well positions, and another named ‘Cp’ that
+contains the Ct values. <code class="docutils literal notranslate"><span class="pre">namer()</span></code> does not use the ‘Pos’ column, but it allows the user to easily verify that wells were accurately named.</p>
+<section id="Using-namer()-for-the-Lightcycler-480">
+<h2>Using <code class="docutils literal notranslate"><span class="pre">namer()</span></code> for the Lightcycler 480<a class="headerlink" href="#Using-namer()-for-the-Lightcycler-480" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">equipt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+<p>This example uses data from an efficiency curve analysis of seven primer sets tested on four dilutions of a single cDNA sample. The first few lines of the .csv file exported by the Lightcycler 480 looks like this:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/22.11.22_PrimerCurve_Ct.csv&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()[:</span><span class="mi">486</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Experiment: DH_22.11.22_PrimerCurve  Selected Filter: SYBR Green I / HRM Dye (465-510)
+Include Color   Pos     Name    Cp      Concentration   Standard        Status
+True    255     A1      Sample 1        17.51           0
+True    16711680        A2      Sample 2        17.54           0       ? - Detector Call uncertain
+True    255     A3      Sample 3        17.55           0
+True    255     A4      Sample 4        18.49           0
+True    255     A5      Sample 5        18.52           0
+True    255     A6      Sample 6        18.54           0
+True    255     A7      Sample 7        19.53           0
+True    255     A8      Sample 8        19.59           0
+True    255     A9      Sample 9        19.59           0
+True    255     A10     Sample 10       20.64           0
+</pre></div></div>
+</div>
+<p>The first line contains the experiment name and filter sets used, the second line contains the column names, and the remaining lines contain tab-separated values for the experiment. Before moving onto <code class="docutils literal notranslate"><span class="pre">namer()</span></code>, lets look at the output of the importer function:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">equipt</span><span class="o">.</span><span class="n">lc480_importer</span><span class="p">(</span><span class="s1">&#39;data/22.11.22_PrimerCurve_Ct.csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Pos</th>
+      <th>Cp</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1</td>
+      <td>17.51</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A2</td>
+      <td>17.54</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A3</td>
+      <td>17.55</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>A4</td>
+      <td>18.49</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>A5</td>
+      <td>18.52</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>A6</td>
+      <td>18.54</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The importer skips the header and strips away all columns except for ‘Pos’ and ‘Cp’. The ‘Cp’ column name is important for subsequent analyses, but <code class="docutils literal notranslate"><span class="pre">namer()</span></code> only uses relative positions to name columns.</p>
+<p>We can now use namer to automatically label the wells. <code class="docutils literal notranslate"><span class="pre">namer()</span></code> uses six parameters. Their documentation is reproduced below:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Params
+______
+
+ct_file : str
+    Path to a CSV or Excel file containing the qPCR data. Currently only
+    data output from a Lightcycler 480 is supported, but the structure of
+    namer() allows for other importers to be written without disrupting the
+    rest of the function.
+
+primers : list of strings
+    A list, in order, of the primers. See documentation for supported plate
+    arrangements.
+
+samples : list of strings
+    A list, in order, or the sample names. See documentation for supported
+    plate arrangements.
+
+reps : int
+    Number of replicate wells. 2, 3, or 4.
+
+config : str
+    A description of how the samples are arranged: &#39;square&#39; or &#39;line&#39;. See
+    documentation for additional details. Default &#39;line&#39;
+
+importer : a custom importer function or None
+    A user-supplied function that imports data from their qPCR instrument
+    to a Pandas Dataframe with columns &#39;Pos&#39;, for the well position, and
+    &#39;Cp&#39; for the Ct values. If None, namer() defaults to an importer for
+    data from the Roche Lightcycler 480. Default None
+
+**kwargs : dictionary
+
+    with_dil : list of strings
+        List of names of samples that have dilution curves.
+
+    dil_series : list of ints
+        List of dilution factors in order on plate. Dilutions
+        should be entered as integers (e.g. a 1:10 dilution
+        should be entered as 10).
+
+    dil_rest : int or None
+        The dilution of samples that do not have a dilution
+        series. If None, with_dil should contain all samples.
+</pre></div>
+</div>
+<p>The **kwargs parameter should only be used if one or more sample has a dilution series. Otherwise it need not be supplied. For this experiment, the following parameter values were used:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">primers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Fus (112734868c1)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Fus (15029724a1)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Ewsr1 (6679715a1)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Ewsr1 (88853580c2)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Taf15 (141803447c1)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Taf15 (141803447c2)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Tsix exon4&#39;</span><span class="p">]</span>
+
+<span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mESC total cDNA&#39;</span><span class="p">]</span>
+
+<span class="n">reps</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span>
+
+<span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;with_dil&#39;</span><span class="p">:</span><span class="n">samples</span><span class="p">,</span>
+         <span class="s1">&#39;dil_series&#39;</span><span class="p">:[</span><span class="mi">20</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">160</span><span class="p">],</span>
+         <span class="s1">&#39;dil_rest&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Supplying these to <code class="docutils literal notranslate"><span class="pre">namer()</span></code> gives the following output:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">equipt</span><span class="o">.</span><span class="n">namer</span><span class="p">(</span><span class="s1">&#39;data/22.11.22_PrimerCurve_Ct.csv&#39;</span><span class="p">,</span>
+            <span class="n">primers</span><span class="p">,</span>
+            <span class="n">samples</span><span class="p">,</span>
+            <span class="n">reps</span><span class="p">,</span>
+            <span class="n">config</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Pos</th>
+      <th>Cp</th>
+      <th>Primer</th>
+      <th>Name</th>
+      <th>NamePrim</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1</td>
+      <td>17.51</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A2</td>
+      <td>17.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A3</td>
+      <td>17.55</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>A4</td>
+      <td>18.49</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_40</td>
+      <td>mESC total cDNA_40Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>A5</td>
+      <td>18.52</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_40</td>
+      <td>mESC total cDNA_40Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>A6</td>
+      <td>18.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_40</td>
+      <td>mESC total cDNA_40Fus (112734868c1)</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">namer()</span></code> has correctly labeled the primer, assigned sample names with the dilution factor after an underscore, and created a column called ‘NamePrim’ that allows for replicate wells to be easily detected. This output can be supplied to any of the other tools in equipt.</p>
+</section>
+<section id="Using-a-custom-importer-function-with-namer()">
+<h2>Using a custom importer function with <code class="docutils literal notranslate"><span class="pre">namer()</span></code><a class="headerlink" href="#Using-a-custom-importer-function-with-namer()" title="Permalink to this heading"></a></h2>
+<p>For data from an instrument other than the LightCycler 480, the user should write a custom import function. For this example, I have taken the exact data used above but reformatted it for a hypothetical qPCR instrument:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/hypotheticaldata.csv&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()[:</span><span class="mi">488</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+﻿Experiment: DH_22.11.22_PrimerCurve  Selected Filter: SYBR Green I / HRM Dye (465-510),,
+&#34;Lorem ipsum dolor sit amet, consectetur adipiscing elit,&#34;,,
+ed do eiusmod tempor incididunt ut labore et dolore magna aliqua.,,
+&#34;Ut enim ad minim veniam, quis nostrud exercitation ullamco&#34;,,
+,,
+Well Location,Name,Ct
+A1,Sample 1,17.51
+A2,Sample 2,17.54
+A3,Sample 3,17.55
+A4,Sample 4,18.49
+A5,Sample 5,18.52
+A6,Sample 6,18.54
+A7,Sample 7,19.53
+A8,Sample 8,19.59
+A9,Sample 9,19.59
+A10,Sample 10,20.64
+</pre></div></div>
+</div>
+<p>In this case, the file has more lines of information at the top, different row naming conventions, and is comma-separated rather than tab-separated. <code class="docutils literal notranslate"><span class="pre">namer()</span></code> will raise an error if it uses the default importer:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">equipt</span><span class="o">.</span><span class="n">namer</span><span class="p">(</span><span class="s1">&#39;data/hypotheticaldata.csv&#39;</span><span class="p">,</span>
+                <span class="n">primers</span><span class="p">,</span>
+                <span class="n">samples</span><span class="p">,</span>
+                <span class="n">reps</span><span class="p">,</span>
+                <span class="n">config</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">ValueError</span>                                Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[7], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">equipt</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">namer</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#39;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">data/hypotheticaldata.csv</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#39;</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-yellow-bg">                </span><span class="ansi-yellow-bg">primers</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-yellow-bg">                </span><span class="ansi-yellow-bg">samples</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-yellow-bg">                </span><span class="ansi-yellow-bg">reps</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-yellow-bg">                </span><span class="ansi-yellow-bg">config</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> <span class="ansi-yellow-bg">                </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">kwargs</span><span class="ansi-yellow-bg">)</span>
+
+File <span class="ansi-green-fg">~/opt/anaconda3/lib/python3.9/site-packages/equipt/opener.py:139</span>, in <span class="ansi-cyan-fg">namer</span><span class="ansi-blue-fg">(ct_file, primers, samples, reps, config, importer, **kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">    137</span> <span style="color: rgb(95,135,135)"># Read in the data</span>
+<span class="ansi-green-intense-fg ansi-bold">    138</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> importer <span style="color: rgb(98,98,98)">==</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">--&gt; 139</span>     ct_data <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">lc480_importer</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">ct_file</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    140</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+<span class="ansi-green-intense-fg ansi-bold">    141</span>     ct_data <span style="color: rgb(98,98,98)">=</span> importer(ct_file)
+
+File <span class="ansi-green-fg">~/opt/anaconda3/lib/python3.9/site-packages/equipt/opener.py:28</span>, in <span class="ansi-cyan-fg">lc480_importer</span><span class="ansi-blue-fg">(ct_file)</span>
+<span class="ansi-green-intense-fg ansi-bold">     23</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> pd<span style="color: rgb(98,98,98)">.</span>read_excel(ct_file,
+<span class="ansi-green-intense-fg ansi-bold">     24</span>                          header<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">1</span>,
+<span class="ansi-green-intense-fg ansi-bold">     25</span>                          usecols<span style="color: rgb(98,98,98)">=</span>[<span style="color: rgb(175,0,0)">&#39;</span><span style="color: rgb(175,0,0)">Pos</span><span style="color: rgb(175,0,0)">&#39;</span>,<span style="color: rgb(175,0,0)">&#39;</span><span style="color: rgb(175,0,0)">Cp</span><span style="color: rgb(175,0,0)">&#39;</span>],
+<span class="ansi-green-intense-fg ansi-bold">     26</span>                          sep<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">&#39;</span><span class="ansi-bold" style="color: rgb(175,95,0)">\t</span><span style="color: rgb(175,0,0)">&#39;</span>)
+<span class="ansi-green-intense-fg ansi-bold">     27</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+<span class="ansi-green-fg">---&gt; 28</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">pd</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">read_csv</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">ct_file</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span>
+<span class="ansi-green-intense-fg ansi-bold">     29</span> <span class="ansi-yellow-bg">                         </span><span class="ansi-yellow-bg">header</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">1</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span>
+<span class="ansi-green-intense-fg ansi-bold">     30</span> <span class="ansi-yellow-bg">                         </span><span class="ansi-yellow-bg">usecols</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#39;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">Pos</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#39;</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#39;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">Cp</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#39;</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">     31</span> <span class="ansi-yellow-bg">                         </span><span class="ansi-yellow-bg">sep</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#39;</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,95,0)">\t</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#39;</span><span class="ansi-yellow-bg">)</span>
+
+File <span class="ansi-green-fg">~/opt/anaconda3/lib/python3.9/site-packages/pandas/io/parsers/readers.py:912</span>, in <span class="ansi-cyan-fg">read_csv</span><span class="ansi-blue-fg">(filepath_or_buffer, sep, delimiter, header, names, index_col, usecols, dtype, engine, converters, true_values, false_values, skipinitialspace, skiprows, skipfooter, nrows, na_values, keep_default_na, na_filter, verbose, skip_blank_lines, parse_dates, infer_datetime_format, keep_date_col, date_parser, date_format, dayfirst, cache_dates, iterator, chunksize, compression, thousands, decimal, lineterminator, quotechar, quoting, doublequote, escapechar, comment, encoding, encoding_errors, dialect, on_bad_lines, delim_whitespace, low_memory, memory_map, float_precision, storage_options, dtype_backend)</span>
+<span class="ansi-green-intense-fg ansi-bold">    899</span> kwds_defaults <span style="color: rgb(98,98,98)">=</span> _refine_defaults_read(
+<span class="ansi-green-intense-fg ansi-bold">    900</span>     dialect,
+<span class="ansi-green-intense-fg ansi-bold">    901</span>     delimiter,
+<span class="ansi-green-fg">   (...)</span>
+<span class="ansi-green-intense-fg ansi-bold">    908</span>     dtype_backend<span style="color: rgb(98,98,98)">=</span>dtype_backend,
+<span class="ansi-green-intense-fg ansi-bold">    909</span> )
+<span class="ansi-green-intense-fg ansi-bold">    910</span> kwds<span style="color: rgb(98,98,98)">.</span>update(kwds_defaults)
+<span class="ansi-green-fg">--&gt; 912</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">_read</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">filepath_or_buffer</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">kwds</span><span class="ansi-yellow-bg">)</span>
+
+File <span class="ansi-green-fg">~/opt/anaconda3/lib/python3.9/site-packages/pandas/io/parsers/readers.py:577</span>, in <span class="ansi-cyan-fg">_read</span><span class="ansi-blue-fg">(filepath_or_buffer, kwds)</span>
+<span class="ansi-green-intense-fg ansi-bold">    574</span> _validate_names(kwds<span style="color: rgb(98,98,98)">.</span>get(<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">names</span><span style="color: rgb(175,0,0)">&#34;</span>, <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>))
+<span class="ansi-green-intense-fg ansi-bold">    576</span> <span style="color: rgb(95,135,135)"># Create the parser.</span>
+<span class="ansi-green-fg">--&gt; 577</span> parser <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">TextFileReader</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">filepath_or_buffer</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg">kwds</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    579</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> chunksize <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> iterator:
+<span class="ansi-green-intense-fg ansi-bold">    580</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> parser
+
+File <span class="ansi-green-fg">~/opt/anaconda3/lib/python3.9/site-packages/pandas/io/parsers/readers.py:1407</span>, in <span class="ansi-cyan-fg">TextFileReader.__init__</span><span class="ansi-blue-fg">(self, f, engine, **kwds)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1404</span>     <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>options[<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">has_index_names</span><span style="color: rgb(175,0,0)">&#34;</span>] <span style="color: rgb(98,98,98)">=</span> kwds[<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">has_index_names</span><span style="color: rgb(175,0,0)">&#34;</span>]
+<span class="ansi-green-intense-fg ansi-bold">   1406</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>handles: IOHandles <span style="color: rgb(98,98,98)">|</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span> <span style="color: rgb(98,98,98)">=</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
+<span class="ansi-green-fg">-&gt; 1407</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_engine <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_make_engine</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">f</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">)</span>
+
+File <span class="ansi-green-fg">~/opt/anaconda3/lib/python3.9/site-packages/pandas/io/parsers/readers.py:1679</span>, in <span class="ansi-cyan-fg">TextFileReader._make_engine</span><span class="ansi-blue-fg">(self, f, engine)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1676</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ValueError</span>(msg)
+<span class="ansi-green-intense-fg ansi-bold">   1678</span> <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
+<span class="ansi-green-fg">-&gt; 1679</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">mapping</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">engine</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">f</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">*</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">options</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">   1680</span> <span class="ansi-bold" style="color: rgb(0,135,0)">except</span> <span class="ansi-bold" style="color: rgb(215,95,95)">Exception</span>:
+<span class="ansi-green-intense-fg ansi-bold">   1681</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>handles <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+
+File <span class="ansi-green-fg">~/opt/anaconda3/lib/python3.9/site-packages/pandas/io/parsers/c_parser_wrapper.py:140</span>, in <span class="ansi-cyan-fg">CParserWrapper.__init__</span><span class="ansi-blue-fg">(self, src, **kwds)</span>
+<span class="ansi-green-intense-fg ansi-bold">    136</span> <span class="ansi-bold" style="color: rgb(0,135,0)">assert</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>orig_names <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>
+<span class="ansi-green-intense-fg ansi-bold">    137</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>usecols_dtype <span style="color: rgb(98,98,98)">==</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">string</span><span style="color: rgb(175,0,0)">&#34;</span> <span class="ansi-bold" style="color: rgb(175,0,255)">and</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span style="color: rgb(0,135,0)">set</span>(usecols)<span style="color: rgb(98,98,98)">.</span>issubset(
+<span class="ansi-green-intense-fg ansi-bold">    138</span>     <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>orig_names
+<span class="ansi-green-intense-fg ansi-bold">    139</span> ):
+<span class="ansi-green-fg">--&gt; 140</span>     <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_validate_usecols_names</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">usecols</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">orig_names</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    142</span> <span style="color: rgb(95,135,135)"># error: Cannot determine type of &#39;names&#39;</span>
+<span class="ansi-green-intense-fg ansi-bold">    143</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">len</span>(<span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>names) <span style="color: rgb(98,98,98)">&gt;</span> <span style="color: rgb(0,135,0)">len</span>(usecols):  <span style="color: rgb(95,135,135)"># type: ignore[has-type]</span>
+<span class="ansi-green-intense-fg ansi-bold">    144</span>     <span style="color: rgb(95,135,135)"># error: Cannot determine type of &#39;names&#39;</span>
+
+File <span class="ansi-green-fg">~/opt/anaconda3/lib/python3.9/site-packages/pandas/io/parsers/base_parser.py:959</span>, in <span class="ansi-cyan-fg">ParserBase._validate_usecols_names</span><span class="ansi-blue-fg">(self, usecols, names)</span>
+<span class="ansi-green-intense-fg ansi-bold">    957</span> missing <span style="color: rgb(98,98,98)">=</span> [c <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> c <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> usecols <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> c <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> names]
+<span class="ansi-green-intense-fg ansi-bold">    958</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span style="color: rgb(0,135,0)">len</span>(missing) <span style="color: rgb(98,98,98)">&gt;</span> <span style="color: rgb(98,98,98)">0</span>:
+<span class="ansi-green-fg">--&gt; 959</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ValueError</span>(
+<span class="ansi-green-intense-fg ansi-bold">    960</span>         <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">Usecols do not match columns, columns expected but not found: </span><span style="color: rgb(175,0,0)">&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    961</span>         <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">&#34;</span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>missing<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    962</span>     )
+<span class="ansi-green-intense-fg ansi-bold">    964</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> usecols
+
+<span class="ansi-red-fg">ValueError</span>: Usecols do not match columns, columns expected but not found: [&#39;Cp&#39;, &#39;Pos&#39;]
+</pre></div></div>
+</div>
+<p>To get around this, the user can make a custom importer:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">customimporter</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">rename_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Well Location&#39;</span><span class="p">:</span><span class="s1">&#39;Pos&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;Ct&#39;</span><span class="p">:</span><span class="s1">&#39;Cp&#39;</span><span class="p">}</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                    <span class="n">header</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                    <span class="n">usecols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Well Location&#39;</span><span class="p">,</span><span class="s1">&#39;Ct&#39;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">rename_dict</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">customimporter</span><span class="p">(</span><span class="s1">&#39;data/hypotheticaldata.csv&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Pos</th>
+      <th>Cp</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1</td>
+      <td>17.51</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A2</td>
+      <td>17.54</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A3</td>
+      <td>17.55</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>A4</td>
+      <td>18.49</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>A5</td>
+      <td>18.52</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>A6</td>
+      <td>18.54</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We can now see that the data is imported in an equivalent format to the LightCycler 480 importer distributed with the package. To use this function with <code class="docutils literal notranslate"><span class="pre">namer()</span></code>, simply supply the function to the importer parameter:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hypodf</span> <span class="o">=</span> <span class="n">equipt</span><span class="o">.</span><span class="n">namer</span><span class="p">(</span><span class="s1">&#39;data/hypotheticaldata.csv&#39;</span><span class="p">,</span>
+                <span class="n">primers</span><span class="p">,</span>
+                <span class="n">samples</span><span class="p">,</span>
+                <span class="n">reps</span><span class="p">,</span>
+                <span class="n">config</span><span class="p">,</span>
+                <span class="n">importer</span><span class="o">=</span><span class="n">customimporter</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="n">hypodf</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Pos</th>
+      <th>Cp</th>
+      <th>Primer</th>
+      <th>Name</th>
+      <th>NamePrim</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1</td>
+      <td>17.51</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A2</td>
+      <td>17.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A3</td>
+      <td>17.55</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>A4</td>
+      <td>18.49</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_40</td>
+      <td>mESC total cDNA_40Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>A5</td>
+      <td>18.52</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_40</td>
+      <td>mESC total cDNA_40Fus (112734868c1)</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The output is identical to that of the original function:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">all</span><span class="p">(</span><span class="n">df</span> <span class="o">==</span> <span class="n">hypodf</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
+</section>
+<section id="Important-Caveats">
+<h2>Important Caveats<a class="headerlink" href="#Important-Caveats" title="Permalink to this heading"></a></h2>
+<ul>
+<li><p><strong>False positives and negatives</strong></p>
+<p>To make <code class="docutils literal notranslate"><span class="pre">namer()</span></code> as modular as possible, it relies on every well that should be labeled having a valid Ct value. If a Ct value is not called and Pandas interprets the well as ‘NaN’, the function will fail. To get around this, any wells that should have Ct values but which did not come up should be manually labeled in the original file as ‘exclude’. Any wells that did not contain sample but which yielded Ct values anyway should be manually deleted. This action should be recorded in a lab
+notebook, but may be a sign of larger issues with the instrument or plate loading. As always, caution should be used when deciding whether to analyze the experiment or repeat it.</p>
+</li>
+<li><p><strong>Dilutions</strong></p>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">namer()</span></code> assumes dilutions are grouped by sample as in the above example. If you have the dilutions in some other conformation, it may be easiest to run <code class="docutils literal notranslate"><span class="pre">namer()</span></code> without the dilutions then update the samples afterwards. For example, say that in the experiment above we instead had samples grouped by dilution rather than dilutions by sample:</p>
+</li>
+</ul>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s pretend we had seven samples and one primer for this example</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cDNA1&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cDNA2&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cDNA3&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cDNA4&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cDNA5&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cDNA6&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;cDNA7&#39;</span><span class="p">]</span>
+
+<span class="n">primers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Fus (112734868c1)&#39;</span><span class="p">,]</span>
+
+<span class="c1"># Set the dilutions as an ordered list</span>
+<span class="n">dilutions</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">160</span><span class="p">]</span>
+
+<span class="c1"># Expand the sample set so that namer() detects the correct number of wells</span>
+<span class="n">new_samples</span> <span class="o">=</span> <span class="n">samples</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">dilutions</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run same as last time, but remove kwargs</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">equipt</span><span class="o">.</span><span class="n">namer</span><span class="p">(</span><span class="s1">&#39;data/22.11.22_PrimerCurve_Ct.csv&#39;</span><span class="p">,</span>
+            <span class="n">primers</span><span class="p">,</span>
+            <span class="n">new_samples</span><span class="p">,</span>
+            <span class="n">reps</span><span class="p">,</span>
+            <span class="n">config</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Pos</th>
+      <th>Cp</th>
+      <th>Primer</th>
+      <th>Name</th>
+      <th>NamePrim</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1</td>
+      <td>17.51</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA1</td>
+      <td>cDNA1Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A2</td>
+      <td>17.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA1</td>
+      <td>cDNA1Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A3</td>
+      <td>17.55</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA1</td>
+      <td>cDNA1Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>A4</td>
+      <td>18.49</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA2</td>
+      <td>cDNA2Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>A5</td>
+      <td>18.52</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA2</td>
+      <td>cDNA2Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>A6</td>
+      <td>18.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA2</td>
+      <td>cDNA2Fus (112734868c1)</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># If using a square conformation, sort by NamePrim to make sure replicate wells</span>
+<span class="c1"># are contiguous</span>
+
+<span class="c1"># Expand dilutions</span>
+<span class="n">new_dils</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dilutions</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">reps</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)):</span>
+        <span class="n">new_dils</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+
+<span class="c1"># Check that length is correct</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">new_dils</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add new_dils to Name column</span>
+<span class="n">new_dils</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">new_dils</span><span class="p">]</span>
+
+<span class="c1"># Update Name</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;dils&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_dils</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dils&#39;</span><span class="p">]</span>
+
+<span class="c1"># Update NamePrim</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;NamePrim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Primer&#39;</span><span class="p">]</span>
+
+<span class="c1"># Drop dilution column</span>
+<span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;dils&#39;</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Check relabeling</span>
+<span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Pos</th>
+      <th>Cp</th>
+      <th>Primer</th>
+      <th>Name</th>
+      <th>NamePrim</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1</td>
+      <td>17.51</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA1_20</td>
+      <td>cDNA1_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A2</td>
+      <td>17.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA1_20</td>
+      <td>cDNA1_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A3</td>
+      <td>17.55</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA1_20</td>
+      <td>cDNA1_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>A4</td>
+      <td>18.49</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA2_20</td>
+      <td>cDNA2_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>A5</td>
+      <td>18.52</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA2_20</td>
+      <td>cDNA2_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>A6</td>
+      <td>18.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>cDNA2_20</td>
+      <td>cDNA2_20Fus (112734868c1)</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> watermark
+<span class="o">%</span><span class="k">watermark</span> -v -p pandas,equipt,jupyterlab
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Python implementation: CPython
+Python version       : 3.9.17
+IPython version      : 8.12.0
+
+pandas    : 2.0.3
+equipt    : 1.0.0
+jupyterlab: 3.6.3
+
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gettingstarted/platesetup.html" class="btn btn-neutral float-left" title="Plate Set-Up" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="averager.html" class="btn btn-neutral float-right" title="averager()" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Drew Honson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

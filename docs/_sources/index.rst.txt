@@ -16,13 +16,8 @@ Welcome to equipt's documentation!
 
 .. toctree::
    :maxdepth: 1
-   :caption: User Guide
+   :caption: Modules
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   modules/namer
+   modules/averager
+   modules/efficiency

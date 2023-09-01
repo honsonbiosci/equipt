@@ -240,7 +240,7 @@ def deltact(ct_data,
         pass
     
     # Compute averages 
-    avgdf = avg_filt(ct_data,reps,thresh=thresh)
+    avgdf = averager(ct_data,reps,thresh=thresh)
         
     # Check for appropriate housekeeping controls
     if len(housekeeping) == 1:
@@ -392,8 +392,10 @@ def deltact(ct_data,
 
 def efficiency(ct_in, # output from namer
               with_dil,
+              reps,
+              thresh=None,
               returnmodel=False, # Whether or not to output the linear model in full
-              ):    
+              **kwargs):    
     
     '''
     Calculates efficiency of qPCR primers based on a standard curve. Returns
@@ -419,6 +421,15 @@ def efficiency(ct_in, # output from namer
         Whether to return a dataframe containing the linear regression model. 
         Default False
         
+    **kwargs : dictionary
+    
+        thresh : float
+            The acceptable standard deviation of replicate well Ct values. 
+            averager() is used to identify wells to drop.
+            
+        reps : int
+            Number of replicate wells loaded per sample.
+        
     Returns
     _______
     
@@ -437,6 +448,12 @@ def efficiency(ct_in, # output from namer
     '''
     # Copy dataframe
     ct_data = ct_in.copy()
+    
+    # Filter outlier wells
+    if kwargs:
+        averager(ct_data,reps,thresh,update_data=True)
+    else:
+        pass
     
     # Generate dilution column and remove from names
     name_ls = [i.split('_') for i in ct_data['Name']]
