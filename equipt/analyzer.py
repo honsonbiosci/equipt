@@ -20,7 +20,7 @@ from sklearn.metrics import r2_score
 import bokeh.plotting as plt
 from bokeh.layouts import gridplot
 
-def averager(ct_data):
+def avg_base(ct_data):
     '''
     Computes average Ct values and errors for sample-primer pairs
     from namer output
@@ -61,11 +61,11 @@ def averager(ct_data):
         
     return avgdf
 
-def avg_filt(ct_data,
+def averager(ct_data,
              reps,
              thresh=0.1):
     '''
-    Runs averager and removes divergent replicate wells. Wells are removed 
+    Runs avg_base and removes divergent replicate wells. Wells are removed 
     until each sample-primer pair has a standard deviation less than or equal
     to a user-specified threshold.
     
@@ -97,7 +97,7 @@ def avg_filt(ct_data,
     dropped = []
     
     while x == 0:
-        avg = averager(ct_data)
+        avg = avg_base(ct_data)
         
         if thresh == None:
             x += 1
