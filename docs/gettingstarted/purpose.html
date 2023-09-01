@@ -20,8 +20,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Plate Set-Up" href="platesetup.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Equipt: Tools for qPCR Analysis" href="../index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,18 +45,19 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Purpose and contents</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#tools">Tools</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="platesetup.html">Plate Set-Up</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../modules/namer.html">namer()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../modules/averager.html">averager()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../modules/efficiency.html">efficiency()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/averager.html">averager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/deltact.html">deltact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/efficiency.html">efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/namer.html">namer</a></li>
 </ul>
 
         </div>
@@ -85,14 +86,13 @@
              
   <section id="purpose-and-contents">
 <h1>Purpose and contents<a class="headerlink" href="#purpose-and-contents" title="Permalink to this heading"></a></h1>
-<p>Equipt is a collection of tools for analyzing quantitative PCR data. Why use equipt? The software associated with many qPCR thermocyclers often contains analysis tools. Some functions such as Ct calling and melting curve analysis rely on the raw fluorometric measurements and are practically identical for every experiment. As such, it makes sense for the instrument-associated software to perform these calculations.</p>
-<p>After these values are calculated, however, the analysis must be highly specific to the experiment. qPCR machine software usually solves the problem with a point and click approach to labeling wells which is tedious and not reproducible. As such, I know hardly anyone who uses those tools. Instead, most people take their Ct values to Excel, <a href="#id1"><span class="problematic" id="id2">`where errors are frequent and difficult to detect.&lt;https://theconversation.com/excel-autocorrect-errors-still-plague-genetic-research-raising-concerns-over-scientific-rigour-166554#:~:text=Our%20research%20shows%20autocorrect%20errors,gene%20name%20mangled%20by%20autocorrect.&gt;`_</span></a></p>
+<p>The goal of equipt is to make quantitative polymerase chain reaction (qPCR) analysis easier, faster, and more reproducible. qPCR instrument software generally has useful tools for calling Ct values and performing melting curve analyses, but it often falls short in using these values for more complicated calculations. These calculations generally require the user to manually label wells in clunky, point-and-click software which is neither convenient nor reproducible.</p>
+<p>Most researchers I know use Excel for qPCR analysis, or write custom scripts in Python or R every time they run an experiment. Not only is this tedious, but using Excel for data analysis is [extremely fraught.](<a class="reference external" href="https://theconversation.com/excel-autocorrect-errors-still-plague-genetic-research-raising-concerns-over-scientific-rigour-166554#:~:text=Our%20research%20shows%20autocorrect%20errors,gene%20name%20mangled%20by%20autocorrect">https://theconversation.com/excel-autocorrect-errors-still-plague-genetic-research-raising-concerns-over-scientific-rigour-166554#:~:text=Our%20research%20shows%20autocorrect%20errors,gene%20name%20mangled%20by%20autocorrect</a>).</p>
 <p>Equipt solves these problems by:</p>
 <ol class="arabic simple">
 <li><p>Enforcing a set of standardized layouts for 96- or 384-well plates.</p></li>
 <li><p>Reproducibly labeling wells such that errors are easily detected.</p></li>
-<li><p>Having explicit, user-specified definitions of outliers for dropping replicate wells.</p></li>
-<li><p>Leveraging the above standardizations in functions for common qPCR analyses.</p></li>
+<li><p>Using these standardizations in modules for common qPCR analyses.</p></li>
 </ol>
 <p>Using equipt will make your qPCR analysis mostly painless and entirely reproducible.</p>
 <section id="tools">
@@ -100,7 +100,7 @@
 <p>Currently equipt has four main tools:</p>
 <ul class="simple">
 <li><p>namer : Labels samples, primers, and dilutions (if applicable) on qPCR outputs. Provides a standardized input for all other functions.</p></li>
-<li><p>avg_filt : Averages replicates and calculates standard deviation. If desired, avg_filt will remove outliers (specified by a maximum acceptable standard deviation) from groups of replicate wells and report how many wells it excluded from each group of replicate wells.</p></li>
+<li><p>averager : Averages replicates and calculates standard deviation. If desired, avg_filt will remove outliers (specified by a maximum acceptable standard deviation) from groups of replicate wells and report how many wells it excluded from each group of replicate wells.</p></li>
 <li><p>efficiency : Calculates qPCR primer efficiency from a standard curve.</p></li>
 <li><p>deltact : Performs ΔCt, ΔΔCt, and/or fold-change analysis for differential gene expression or enrichment analysis.</p></li>
 </ul>
@@ -111,8 +111,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="platesetup.html" class="btn btn-neutral float-right" title="Plate Set-Up" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="Equipt: Tools for qPCR Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

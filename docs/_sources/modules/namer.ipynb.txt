@@ -5,7 +5,7 @@
    "id": "751edb23-dee8-4d68-bd89-ba0bfe73bd8a",
    "metadata": {},
    "source": [
-    "# namer()"
+    "# namer"
    ]
   },
   {

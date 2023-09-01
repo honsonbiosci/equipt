@@ -1,9 +1,9 @@
 Purpose and contents
 ====================
 
-Equipt is a collection of tools for analyzing quantitative PCR data. Why use equipt? The software associated with many qPCR thermocyclers often contains analysis tools. Some functions such as Ct calling and melting curve analysis rely on the raw fluorometric measurements and are practically identical for every experiment. As such, it makes sense for the instrument-associated software to perform these calculations.
+The goal of equipt is to make quantitative polymerase chain reaction (qPCR) analysis easier, faster, and more reproducible. qPCR instrument software generally has useful tools for calling Ct values and performing melting curve analyses, but it often falls short in using these values for more complicated calculations. These calculations generally require the user to manually label wells in clunky, point-and-click software which is neither convenient nor reproducible.
 
-After these values are calculated, however, the analysis must be highly specific to the experiment. qPCR machine software usually solves the problem with a point and click approach to labeling wells which is tedious and not reproducible. As such, I know hardly anyone who uses those tools. Instead, most people take their Ct values to Excel, `where errors are frequent and difficult to detect.<https://theconversation.com/excel-autocorrect-errors-still-plague-genetic-research-raising-concerns-over-scientific-rigour-166554#:~:text=Our%20research%20shows%20autocorrect%20errors,gene%20name%20mangled%20by%20autocorrect.>`_
+Most researchers I know use Excel for qPCR analysis, or write custom scripts in Python or R every time they run an experiment. Not only is this tedious, but using Excel for data analysis is [extremely fraught.](https://theconversation.com/excel-autocorrect-errors-still-plague-genetic-research-raising-concerns-over-scientific-rigour-166554#:~:text=Our%20research%20shows%20autocorrect%20errors,gene%20name%20mangled%20by%20autocorrect). 
 
 Equipt solves these problems by:
 
@@ -11,9 +11,7 @@ Equipt solves these problems by:
 
 2) Reproducibly labeling wells such that errors are easily detected. 
 
-3) Having explicit, user-specified definitions of outliers for dropping replicate wells.
-
-4) Leveraging the above standardizations in functions for common qPCR analyses.
+3) Using these standardizations in modules for common qPCR analyses.
 
 Using equipt will make your qPCR analysis mostly painless and entirely reproducible.
 
@@ -24,7 +22,7 @@ Currently equipt has four main tools:
 
 * namer : Labels samples, primers, and dilutions (if applicable) on qPCR outputs. Provides a standardized input for all other functions.
 
-* avg_filt : Averages replicates and calculates standard deviation. If desired, avg_filt will remove outliers (specified by a maximum acceptable standard deviation) from groups of replicate wells and report how many wells it excluded from each group of replicate wells.
+* averager : Averages replicates and calculates standard deviation. If desired, avg_filt will remove outliers (specified by a maximum acceptable standard deviation) from groups of replicate wells and report how many wells it excluded from each group of replicate wells.
 
 * efficiency : Calculates qPCR primer efficiency from a standard curve. 
 
