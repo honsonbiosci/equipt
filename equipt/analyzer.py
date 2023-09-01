@@ -393,7 +393,6 @@ def deltact(ct_data,
 def efficiency(ct_in, # output from namer
               with_dil,
               reps,
-              thresh=None,
               returnmodel=False, # Whether or not to output the linear model in full
               **kwargs):    
     
@@ -410,12 +409,6 @@ def efficiency(ct_in, # output from namer
     with_dil : list of strings
         List of samples that have dilution series. Generally has only one value,
         but in specific cases multiple samples may have curves.
-        
-    dil_series : list of ints
-        List of dilution factors in order on the plate. E.g. a dilution series 
-        from 1:20 to 1:160 could be entered as [20, 40, 80, 160]. Any dilution
-        series is acceptable, but ideally it should cover at least a three
-        cycle difference.
         
     returnmodel : Bool
         Whether to return a dataframe containing the linear regression model. 
@@ -451,7 +444,7 @@ def efficiency(ct_in, # output from namer
     
     # Filter outlier wells
     if kwargs:
-        averager(ct_data,reps,thresh,update_data=True)
+        averager(ct_data,reps,thresh=thresh,update_data=True)
     else:
         pass
     
