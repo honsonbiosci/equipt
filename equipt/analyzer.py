@@ -392,7 +392,6 @@ def deltact(ct_data,
 
 def efficiency(ct_in, # output from namer
               with_dil,
-              reps,
               returnmodel=False, # Whether or not to output the linear model in full
               **kwargs):    
     
