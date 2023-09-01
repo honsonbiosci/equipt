@@ -53,9 +53,15 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Modules</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="namer.html"><code class="docutils literal notranslate"><span class="pre">namer()</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="averager.html"><code class="docutils literal notranslate"><span class="pre">averager()</span></code></a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">efficiency()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="namer.html">namer()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="averager.html">averager()</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">efficiency()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Using-namer()-to-get-a-dataframe-for-efficiency()">Using namer() to get a dataframe for efficiency()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-efficiency()">Using efficiency()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Standard-curve-visualization-with-efficiency()">Standard curve visualization with efficiency()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Returning-the-linear-model">Returning the linear model</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -72,7 +78,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active"><code class="docutils literal notranslate"><span class="pre">efficiency()</span></code></li>
+      <li class="breadcrumb-item active">efficiency()</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/modules/efficiency.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -83,15 +89,851 @@
            <div itemprop="articleBody">
              
   <section id="efficiency()">
-<h1><code class="docutils literal notranslate"><span class="pre">efficiency()</span></code><a class="headerlink" href="#efficiency()" title="Permalink to this heading"></a></h1>
+<h1>efficiency()<a class="headerlink" href="#efficiency()" title="Permalink to this heading"></a></h1>
+<p>In a perfect PCR reaction, the amount of product should double with each additional reaction cycle. In reality, primers often deviate considerably from perfect doubling. This deviation causes problems for qPCR analysis, as an assumption of comparing Ct values between primer sets is that the amplification curves have approximately the same shape during their logarithmic phases. As such, verifying that primers amplify approximately exponentially is an important part of qPCR experimentation.</p>
+<p>The most common metric calculated to compare primer amplification is efficiency. Efficiency is calculated from a standard curve. For each two-fold dilution in the standard curve, the Ct value should increase by 1. In other words, when Ct values are plotted against log2(dilution), the slope should be 1. This slope is the efficiency value (E).</p>
+<p>If E &gt; 1, the amount of PCR product is more than doubling each PCR cycle. This is often due to primer-dimers or other issues with multiple amplicons. If E &lt; 1, the PCR product is doubling more slowly than once per PCR cycle. This could be due to primer secondary structure, non-optimal melting temperature, primer saturation, or difficult templates.</p>
+<p>To test the primers over a large enough concentration range, each dilution should be at least a factor of two, and three to five dilutions should be used. For certain targets, the reverse transcription reaction conditions and dilution factors may need to be adjusted to keep the highest Ct values under 30. Additionally, optimal primer concentrations may vary, but in general a final concentration between 0.5-1.0µM gives good results.</p>
+<p><code class="docutils literal notranslate"><span class="pre">efficiency()</span></code> calculates E from a standard curve using linear regression and returns the E value, the correlation coefficient of the linear regression, and a plot of the calculated curve for each primer set. It also has the option of returning the linear model.</p>
+<section id="Using-namer()-to-get-a-dataframe-for-efficiency()">
+<h2>Using namer() to get a dataframe for efficiency()<a class="headerlink" href="#Using-namer()-to-get-a-dataframe-for-efficiency()" title="Permalink to this heading"></a></h2>
+<p>For this example, we will just look at data from a Lightcycler 480 formatted as <code class="docutils literal notranslate"><span class="pre">namer()</span></code> anticipates. The <code class="docutils literal notranslate"><span class="pre">namer()</span></code> documentation has details on how to use the function for other instruments and dilution arrangements.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">equipt</span>
 </pre></div>
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">primers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Fus (112734868c1)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Fus (15029724a1)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Ewsr1 (6679715a1)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Ewsr1 (88853580c2)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Taf15 (141803447c1)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Taf15 (141803447c2)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;Tsix exon4&#39;</span><span class="p">]</span>
+
+<span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mESC total cDNA&#39;</span><span class="p">]</span>
+
+<span class="n">reps</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span>
+
+<span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;with_dil&#39;</span><span class="p">:</span><span class="n">samples</span><span class="p">,</span>
+         <span class="s1">&#39;dil_series&#39;</span><span class="p">:[</span><span class="mi">20</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">160</span><span class="p">],</span>
+         <span class="s1">&#39;dil_rest&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">}</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">equipt</span><span class="o">.</span><span class="n">namer</span><span class="p">(</span><span class="s1">&#39;data/22.11.22_PrimerCurve_Ct.csv&#39;</span><span class="p">,</span>
+            <span class="n">primers</span><span class="p">,</span>
+            <span class="n">samples</span><span class="p">,</span>
+            <span class="n">reps</span><span class="p">,</span>
+            <span class="n">config</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Pos</th>
+      <th>Cp</th>
+      <th>Primer</th>
+      <th>Name</th>
+      <th>NamePrim</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>A1</td>
+      <td>17.51</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>A2</td>
+      <td>17.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>A3</td>
+      <td>17.55</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_20</td>
+      <td>mESC total cDNA_20Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>A4</td>
+      <td>18.49</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_40</td>
+      <td>mESC total cDNA_40Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>A5</td>
+      <td>18.52</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_40</td>
+      <td>mESC total cDNA_40Fus (112734868c1)</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>A6</td>
+      <td>18.54</td>
+      <td>Fus (112734868c1)</td>
+      <td>mESC total cDNA_40</td>
+      <td>mESC total cDNA_40Fus (112734868c1)</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>We can now see that the ‘Name’ column has the sample name and the dilution factor separated by an underscore. If a user plans to write their own script to label dilutions, it is critical that samples are labeled in this way.</p>
+</section>
+<section id="Using-efficiency()">
+<h2>Using efficiency()<a class="headerlink" href="#Using-efficiency()" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">gridplot</span>
+<span class="kn">import</span> <span class="nn">bokeh.io</span>
+
+<span class="n">bokeh</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">output_notebook</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<style>
+        .bk-notebook-logo {
+            display: block;
+            width: 20px;
+            height: 20px;
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNui8sowAAAOkSURBVDiNjZRtaJVlGMd/1/08zzln5zjP1LWcU9N0NkN8m2CYjpgQYQXqSs0I84OLIC0hkEKoPtiH3gmKoiJDU7QpLgoLjLIQCpEsNJ1vqUOdO7ppbuec5+V+rj4ctwzd8IIbbi6u+8f1539dt3A78eXC7QizUF7gyV1fD1Yqg4JWz84yffhm0qkFqBogB9rM8tZdtwVsPUhWhGcFJngGeWrPzHm5oaMmkfEg1usvLFyc8jLRqDOMru7AyC8saQr7GG7f5fvDeH7Ej8CM66nIF+8yngt6HWaKh7k49Soy9nXurCi1o3qUbS3zWfrYeQDTB/Qj6kX6Ybhw4B+bOYoLKCC9H3Nu/leUTZ1JdRWkkn2ldcCamzrcf47KKXdAJllSlxAOkRgyHsGC/zRday5Qld9DyoM4/q/rUoy/CXh3jzOu3bHUVZeU+DEn8FInkPBFlu3+nW3Nw0mk6vCDiWg8CeJaxEwuHS3+z5RgY+YBR6V1Z1nxSOfoaPa4LASWxxdNp+VWTk7+4vzaou8v8PN+xo+KY2xsw6une2frhw05CTYOmQvsEhjhWjn0bmXPjpE1+kplmmkP3suftwTubK9Vq22qKmrBhpY4jvd5afdRA3wGjFAgcnTK2s4hY0/GPNIb0nErGMCRxWOOX64Z8RAC4oCXdklmEvcL8o0BfkNK4lUg9HTl+oPlQxdNo3Mg4Nv175e/1LDGzZen30MEjRUtmXSfiTVu1kK8W4txyV6BMKlbgk3lMwYCiusNy9fVfvvwMxv8Ynl6vxoByANLTWplvuj/nF9m2+PDtt1eiHPBr1oIfhCChQMBw6Aw0UulqTKZdfVvfG7VcfIqLG9bcldL/+pdWTLxLUy8Qq38heUIjh4XlzZxzQm19lLFlr8vdQ97rjZVOLf8nclzckbcD4wxXMidpX30sFd37Fv/GtwwhzhxGVAprjbg0gCAEeIgwCZyTV2Z1REEW8O4py0wsjeloKoMr6iCY6dP92H6Vw/oTyICIthibxjm/DfN9lVz8IqtqKYLUXfoKVMVQVVJOElGjrnnUt9T9wbgp8AyYKaGlqingHZU/uG2NTZSVqwHQTWkx9hxjkpWDaCg6Ckj5qebgBVbT3V3NNXMSiWSDdGV3hrtzla7J+duwPOToIg42ChPQOQjspnSlp1V+Gjdged7+8UN5CRAV7a5EdFNwCjEaBR27b3W890TE7g24NAP/mMDXRWrGoFPQI9ls/MWO2dWFAar/xcOIImbbpA3zgAAAABJRU5ErkJggg==);
+        }
+    </style>
+    <div>
+        <a href="https://bokeh.org" target="_blank" class="bk-notebook-logo"></a>
+        <span id="e4367f7f-5490-4e93-9148-52c596a63625">Loading BokehJS ...</span>
+    </div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="output_javascript"></div>
+<script type="text/javascript">
+var element = document.currentScript.previousSibling.previousSibling;
+(function(root) {
+  function now() {
+    return new Date();
+  }
+
+  const force = true;
+
+  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
+    root._bokeh_onload_callbacks = [];
+    root._bokeh_is_loading = undefined;
+  }
+
+const JS_MIME_TYPE = 'application/javascript';
+  const HTML_MIME_TYPE = 'text/html';
+  const EXEC_MIME_TYPE = 'application/vnd.bokehjs_exec.v0+json';
+  const CLASS_NAME = 'output_bokeh rendered_html';
+
+  /**
+   * Render data to the DOM node
+   */
+  function render(props, node) {
+    const script = document.createElement("script");
+    node.appendChild(script);
+  }
+
+  /**
+   * Handle when an output is cleared or removed
+   */
+  function handleClearOutput(event, handle) {
+    const cell = handle.cell;
+
+    const id = cell.output_area._bokeh_element_id;
+    const server_id = cell.output_area._bokeh_server_id;
+    // Clean up Bokeh references
+    if (id != null && id in Bokeh.index) {
+      Bokeh.index[id].model.document.clear();
+      delete Bokeh.index[id];
+    }
+
+    if (server_id !== undefined) {
+      // Clean up Bokeh references
+      const cmd_clean = "from bokeh.io.state import curstate; print(curstate().uuid_to_server['" + server_id + "'].get_sessions()[0].document.roots[0]._id)";
+      cell.notebook.kernel.execute(cmd_clean, {
+        iopub: {
+          output: function(msg) {
+            const id = msg.content.text.trim();
+            if (id in Bokeh.index) {
+              Bokeh.index[id].model.document.clear();
+              delete Bokeh.index[id];
+            }
+          }
+        }
+      });
+      // Destroy server and session
+      const cmd_destroy = "import bokeh.io.notebook as ion; ion.destroy_server('" + server_id + "')";
+      cell.notebook.kernel.execute(cmd_destroy);
+    }
+  }
+
+  /**
+   * Handle when a new output is added
+   */
+  function handleAddOutput(event, handle) {
+    const output_area = handle.output_area;
+    const output = handle.output;
+
+    // limit handleAddOutput to display_data with EXEC_MIME_TYPE content only
+    if ((output.output_type != "display_data") || (!Object.prototype.hasOwnProperty.call(output.data, EXEC_MIME_TYPE))) {
+      return
+    }
+
+    const toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
+
+    if (output.metadata[EXEC_MIME_TYPE]["id"] !== undefined) {
+      toinsert[toinsert.length - 1].firstChild.textContent = output.data[JS_MIME_TYPE];
+      // store reference to embed id on output_area
+      output_area._bokeh_element_id = output.metadata[EXEC_MIME_TYPE]["id"];
+    }
+    if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
+      const bk_div = document.createElement("div");
+      bk_div.innerHTML = output.data[HTML_MIME_TYPE];
+      const script_attrs = bk_div.children[0].attributes;
+      for (let i = 0; i < script_attrs.length; i++) {
+        toinsert[toinsert.length - 1].firstChild.setAttribute(script_attrs[i].name, script_attrs[i].value);
+        toinsert[toinsert.length - 1].firstChild.textContent = bk_div.children[0].textContent
+      }
+      // store reference to server id on output_area
+      output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
+    }
+  }
+
+  function register_renderer(events, OutputArea) {
+
+    function append_mime(data, metadata, element) {
+      // create a DOM node to render to
+      const toinsert = this.create_output_subarea(
+        metadata,
+        CLASS_NAME,
+        EXEC_MIME_TYPE
+      );
+      this.keyboard_manager.register_events(toinsert);
+      // Render to node
+      const props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
+      render(props, toinsert[toinsert.length - 1]);
+      element.append(toinsert);
+      return toinsert
+    }
+
+    /* Handle when an output is cleared or removed */
+    events.on('clear_output.CodeCell', handleClearOutput);
+    events.on('delete.Cell', handleClearOutput);
+
+    /* Handle when a new output is added */
+    events.on('output_added.OutputArea', handleAddOutput);
+
+    /**
+     * Register the mime type and append_mime function with output_area
+     */
+    OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
+      /* Is output safe? */
+      safe: true,
+      /* Index of renderer in `output_area.display_order` */
+      index: 0
+    });
+  }
+
+  // register the mime type if in Jupyter Notebook environment and previously unregistered
+  if (root.Jupyter !== undefined) {
+    const events = require('base/js/events');
+    const OutputArea = require('notebook/js/outputarea').OutputArea;
+
+    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
+      register_renderer(events, OutputArea);
+    }
+  }
+  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
+    root._bokeh_timeout = Date.now() + 5000;
+    root._bokeh_failed_load = false;
+  }
+
+  const NB_LOAD_WARNING = {'data': {'text/html':
+     "<div style='background-color: #fdd'>\n"+
+     "<p>\n"+
+     "BokehJS does not appear to have successfully loaded. If loading BokehJS from CDN, this \n"+
+     "may be due to a slow or bad network connection. Possible fixes:\n"+
+     "</p>\n"+
+     "<ul>\n"+
+     "<li>re-rerun `output_notebook()` to attempt to load from CDN again, or</li>\n"+
+     "<li>use INLINE resources instead, as so:</li>\n"+
+     "</ul>\n"+
+     "<code>\n"+
+     "from bokeh.resources import INLINE\n"+
+     "output_notebook(resources=INLINE)\n"+
+     "</code>\n"+
+     "</div>"}};
+
+  function display_loaded() {
+    const el = document.getElementById("e4367f7f-5490-4e93-9148-52c596a63625");
+    if (el != null) {
+      el.textContent = "BokehJS is loading...";
+    }
+    if (root.Bokeh !== undefined) {
+      if (el != null) {
+        el.textContent = "BokehJS " + root.Bokeh.version + " successfully loaded.";
+      }
+    } else if (Date.now() < root._bokeh_timeout) {
+      setTimeout(display_loaded, 100)
+    }
+  }
+
+  function run_callbacks() {
+    try {
+      root._bokeh_onload_callbacks.forEach(function(callback) {
+        if (callback != null)
+          callback();
+      });
+    } finally {
+      delete root._bokeh_onload_callbacks
+    }
+    console.debug("Bokeh: all callbacks have finished");
+  }
+
+  function load_libs(css_urls, js_urls, callback) {
+    if (css_urls == null) css_urls = [];
+    if (js_urls == null) js_urls = [];
+
+    root._bokeh_onload_callbacks.push(callback);
+    if (root._bokeh_is_loading > 0) {
+      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
+      return null;
+    }
+    if (js_urls == null || js_urls.length === 0) {
+      run_callbacks();
+      return null;
+    }
+    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
+    root._bokeh_is_loading = css_urls.length + js_urls.length;
+
+    function on_load() {
+      root._bokeh_is_loading--;
+      if (root._bokeh_is_loading === 0) {
+        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
+        run_callbacks()
+      }
+    }
+
+    function on_error(url) {
+      console.error("failed to load " + url);
+    }
+
+    for (let i = 0; i < css_urls.length; i++) {
+      const url = css_urls[i];
+      const element = document.createElement("link");
+      element.onload = on_load;
+      element.onerror = on_error.bind(null, url);
+      element.rel = "stylesheet";
+      element.type = "text/css";
+      element.href = url;
+      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
+      document.body.appendChild(element);
+    }
+
+    for (let i = 0; i < js_urls.length; i++) {
+      const url = js_urls[i];
+      const element = document.createElement('script');
+      element.onload = on_load;
+      element.onerror = on_error.bind(null, url);
+      element.async = false;
+      element.src = url;
+      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
+      document.head.appendChild(element);
+    }
+  };
+
+  function inject_raw_css(css) {
+    const element = document.createElement("style");
+    element.appendChild(document.createTextNode(css));
+    document.body.appendChild(element);
+  }
+
+  const js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-3.1.1.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.1.1.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.1.1.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.1.1.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.1.1.min.js"];
+  const css_urls = [];
+
+  const inline_js = [    function(Bokeh) {
+      Bokeh.set_log_level("info");
+    },
+function(Bokeh) {
+    }
+  ];
+
+  function run_inline_js() {
+    if (root.Bokeh !== undefined || force === true) {
+          for (let i = 0; i < inline_js.length; i++) {
+      inline_js[i].call(root, root.Bokeh);
+    }
+if (force === true) {
+        display_loaded();
+      }} else if (Date.now() < root._bokeh_timeout) {
+      setTimeout(run_inline_js, 100);
+    } else if (!root._bokeh_failed_load) {
+      console.log("Bokeh: BokehJS failed to load within specified timeout.");
+      root._bokeh_failed_load = true;
+    } else if (force !== true) {
+      const cell = $(document.getElementById("e4367f7f-5490-4e93-9148-52c596a63625")).parents('.cell').data().cell;
+      cell.output_area.append_execute_result(NB_LOAD_WARNING)
+    }
+  }
+
+  if (root._bokeh_is_loading === 0) {
+    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
+    run_inline_js();
+  } else {
+    load_libs(css_urls, js_urls, function() {
+      console.debug("Bokeh: BokehJS plotting callback run at", now());
+      run_inline_js();
+    });
+  }
+}(window));
+</script></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">efficiency()</span></code> takes three parameters and two optional keyword arguments. Their documentation is reproduced here:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Params
+______
+
+ct_data : a dataframe
+    Output of namer().
+
+with_dil : list of strings
+    List of samples that have dilution series. Generally has only one value,
+    but in specific cases multiple samples may have curves.
+
+returnmodel : Bool
+    Whether to return a dataframe containing the linear regression model.
+    Default False
+
+**kwargs : dictionary
+
+    thresh : float
+        The acceptable standard deviation of replicate well Ct values.
+        averager() is used to identify wells to drop.
+
+    reps : int
+        Number of replicate wells loaded per sample.
+</pre></div>
+</div>
+<p>It returns either two or three outputs depending on the value of returnmodel, as specified in the documentation:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Returns
+_______
+
+plot_dict : a dictionary
+    A dictionary in which the keys are samples and the value is a list of
+    Bokeh plots for each primer tested.
+
+eff_df : a dataframe
+    A dataframe containing the efficiency values and R^2 statistic
+    calculated for each sample-primer pair.
+
+model_df : a dataframe
+    Only returned if returnmodel == True. A dataframe containing the
+    intercept and slope of the linear model for each sample-primer pair.
+</pre></div>
+</div>
+<p>Using the dataframe generated above, we can easily calculate efficiency values:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eff_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;thresh&#39;</span><span class="p">:</span><span class="mf">0.1</span><span class="p">,</span>
+             <span class="s1">&#39;reps&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
+
+<span class="n">plot_dict</span><span class="p">,</span> <span class="n">eff_df</span> <span class="o">=</span> <span class="n">equipt</span><span class="o">.</span><span class="n">efficiency</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+                               <span class="n">samples</span><span class="p">,</span>
+                               <span class="n">returnmodel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                               <span class="o">**</span><span class="n">eff_kwargs</span><span class="p">)</span>
+
+<span class="n">eff_df</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Name</th>
+      <th>Primer</th>
+      <th>Efficiency</th>
+      <th>Rsquared</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>mESC total cDNA</td>
+      <td>Ewsr1 (6679715a1)</td>
+      <td>0.953</td>
+      <td>0.934628</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>mESC total cDNA</td>
+      <td>Ewsr1 (88853580c2)</td>
+      <td>0.976</td>
+      <td>0.934442</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>mESC total cDNA</td>
+      <td>Fus (112734868c1)</td>
+      <td>0.952</td>
+      <td>0.921493</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>mESC total cDNA</td>
+      <td>Fus (15029724a1)</td>
+      <td>0.997</td>
+      <td>0.932829</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>mESC total cDNA</td>
+      <td>Taf15 (141803447c1)</td>
+      <td>1.023</td>
+      <td>0.925023</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>mESC total cDNA</td>
+      <td>Taf15 (141803447c2)</td>
+      <td>1.000</td>
+      <td>0.933382</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>mESC total cDNA</td>
+      <td>Tsix exon4</td>
+      <td>1.108</td>
+      <td>0.929611</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Immediately we can see most of the primers have acceptable efficiency values, but Tsix exon4 is a bit high.</p>
+</section>
+<section id="Standard-curve-visualization-with-efficiency()">
+<h2>Standard curve visualization with efficiency()<a class="headerlink" href="#Standard-curve-visualization-with-efficiency()" title="Permalink to this heading"></a></h2>
+<p>Having calculated the efficiency values, we noticed that two of our primer sets appear to have unacceptable values. Looking at the plots of the standard curve can give insights on what might be going wrong with those primers. <code class="docutils literal notranslate"><span class="pre">efficiency()</span></code> returns a dictionary that uses the sample names as keys and a list of Bokeh plots as values for easy visualization. Here are all the plots laid out in a gridplot:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eff_gp</span> <span class="o">=</span> <span class="n">gridplot</span><span class="p">(</span><span class="n">plot_dict</span><span class="p">[</span><span class="s1">&#39;mESC total cDNA&#39;</span><span class="p">],</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">bokeh</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">eff_gp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div id="f8baebd2-300d-48a3-8bcd-3feb6672f89f" data-root-id="p1603" style="display: contents;"></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="output_javascript"></div>
+<script type="text/javascript">
+var element = document.currentScript.previousSibling.previousSibling;
+(function(root) {
+  function embed_document(root) {
+  const docs_json = {"1e64ec87-b0cf-4447-b4f2-c330762f9a52":{"version":"3.1.1","title":"Bokeh Application","defs":[],"roots":[{"type":"object","name":"GridPlot","id":"p1603","attributes":{"rows":null,"cols":null,"toolbar":{"type":"object","name":"Toolbar","id":"p1602","attributes":{"tools":[{"type":"object","name":"ToolProxy","id":"p1596","attributes":{"tools":[{"type":"object","name":"PanTool","id":"p1033"},{"type":"object","name":"PanTool","id":"p1098"},{"type":"object","name":"PanTool","id":"p1163"},{"type":"object","name":"PanTool","id":"p1228"},{"type":"object","name":"PanTool","id":"p1293"},{"type":"object","name":"PanTool","id":"p1358"},{"type":"object","name":"PanTool","id":"p1423"}]}},{"type":"object","name":"ToolProxy","id":"p1597","attributes":{"tools":[{"type":"object","name":"WheelZoomTool","id":"p1034"},{"type":"object","name":"WheelZoomTool","id":"p1099"},{"type":"object","name":"WheelZoomTool","id":"p1164"},{"type":"object","name":"WheelZoomTool","id":"p1229"},{"type":"object","name":"WheelZoomTool","id":"p1294"},{"type":"object","name":"WheelZoomTool","id":"p1359"},{"type":"object","name":"WheelZoomTool","id":"p1424"}]}},{"type":"object","name":"ToolProxy","id":"p1598","attributes":{"tools":[{"type":"object","name":"BoxZoomTool","id":"p1035","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1036","attributes":{"syncable":false,"level":"overlay","visible":false,"left_units":"canvas","right_units":"canvas","bottom_units":"canvas","top_units":"canvas","line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5}}}},{"type":"object","name":"BoxZoomTool","id":"p1100","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1101","attributes":{"syncable":false,"level":"overlay","visible":false,"left_units":"canvas","right_units":"canvas","bottom_units":"canvas","top_units":"canvas","line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5}}}},{"type":"object","name":"BoxZoomTool","id":"p1165","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1166","attributes":{"syncable":false,"level":"overlay","visible":false,"left_units":"canvas","right_units":"canvas","bottom_units":"canvas","top_units":"canvas","line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5}}}},{"type":"object","name":"BoxZoomTool","id":"p1230","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1231","attributes":{"syncable":false,"level":"overlay","visible":false,"left_units":"canvas","right_units":"canvas","bottom_units":"canvas","top_units":"canvas","line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5}}}},{"type":"object","name":"BoxZoomTool","id":"p1295","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1296","attributes":{"syncable":false,"level":"overlay","visible":false,"left_units":"canvas","right_units":"canvas","bottom_units":"canvas","top_units":"canvas","line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5}}}},{"type":"object","name":"BoxZoomTool","id":"p1360","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1361","attributes":{"syncable":false,"level":"overlay","visible":false,"left_units":"canvas","right_units":"canvas","bottom_units":"canvas","top_units":"canvas","line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5}}}},{"type":"object","name":"BoxZoomTool","id":"p1425","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1426","attributes":{"syncable":false,"level":"overlay","visible":false,"left_units":"canvas","right_units":"canvas","bottom_units":"canvas","top_units":"canvas","line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5}}}}]}},{"type":"object","name":"SaveTool","id":"p1599"},{"type":"object","name":"ToolProxy","id":"p1600","attributes":{"tools":[{"type":"object","name":"ResetTool","id":"p1038"},{"type":"object","name":"ResetTool","id":"p1103"},{"type":"object","name":"ResetTool","id":"p1168"},{"type":"object","name":"ResetTool","id":"p1233"},{"type":"object","name":"ResetTool","id":"p1298"},{"type":"object","name":"ResetTool","id":"p1363"},{"type":"object","name":"ResetTool","id":"p1428"}]}},{"type":"object","name":"ToolProxy","id":"p1601","attributes":{"tools":[{"type":"object","name":"HelpTool","id":"p1039"},{"type":"object","name":"HelpTool","id":"p1104"},{"type":"object","name":"HelpTool","id":"p1169"},{"type":"object","name":"HelpTool","id":"p1234"},{"type":"object","name":"HelpTool","id":"p1299"},{"type":"object","name":"HelpTool","id":"p1364"},{"type":"object","name":"HelpTool","id":"p1429"}]}}]}},"children":[[{"type":"object","name":"Figure","id":"p1001","attributes":{"width":400,"height":400,"x_range":{"type":"object","name":"DataRange1d","id":"p1003"},"y_range":{"type":"object","name":"DataRange1d","id":"p1002"},"x_scale":{"type":"object","name":"LinearScale","id":"p1015"},"y_scale":{"type":"object","name":"LinearScale","id":"p1017"},"title":{"type":"object","name":"Title","id":"p1004","attributes":{"text":"mESC total cDNA Ewsr1 (6679715a1)"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1054","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1048","attributes":{"selected":{"type":"object","name":"Selection","id":"p1049","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1050"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcC50byEp0kRwLnRvISnSRHAudG8hKdJFcC50byEp0kVwLnRvISnSRXAudG8hKdJGcC50byEp0kZwLnRvISnSRnAudG8hKdJHcC50byEp0kdwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"H4XrUbjeMkCuR+F6FO4yQKRwPQrX4zJAmpmZmZnZM0ApXI/C9egzQDMzMzMz8zNAKVyPwvXoNEB7FK5H4fo0QHsUrkfh+jRAexSuR+H6NUA9CtejcP01QIXrUbgeBTZA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1055","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1056"}}},"glyph":{"type":"object","name":"Circle","id":"p1051","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Circle","id":"p1052","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Circle","id":"p1053","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1063","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1057","attributes":{"selected":{"type":"object","name":"Selection","id":"p1058","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1059"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcDQLjFW7WASwOiLpSczeBPA/+gZ+XiPFMAWRo7KvqYVwC6jApwEvhbARQB3bUrVF8BcXes+kOwYwHO6XxDWAxrAihfU4RsbG8CidEizYTIcwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"sLmQNKXiMkCefEgw7iozQI0/ACw3czNAfAK4J4C7M0BqxW8jyQM0QFmIJx8STDRASEvfGluUNEA2DpcWpNw0QCTRThLtJDVAE5QGDjZtNUACV74Jf7U1QPAZdgXI/TVA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1064","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1065"}}},"glyph":{"type":"object","name":"Line","id":"p1060","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4"}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1061","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.1}},"muted_glyph":{"type":"object","name":"Line","id":"p1062","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1007","attributes":{"tools":[{"id":"p1033"},{"id":"p1034"},{"id":"p1035"},{"type":"object","name":"SaveTool","id":"p1037"},{"id":"p1038"},{"id":"p1039"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1026","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1027","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1029"},"axis_label":"Ct","major_label_policy":{"type":"object","name":"AllLabels","id":"p1028"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1019","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1020","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1022"},"axis_label":"Log2Dil","major_label_policy":{"type":"object","name":"AllLabels","id":"p1021"}}}],"center":[{"type":"object","name":"Grid","id":"p1025","attributes":{"axis":{"id":"p1019"}}},{"type":"object","name":"Grid","id":"p1032","attributes":{"dimension":1,"axis":{"id":"p1026"}}}]}},0,0],[{"type":"object","name":"Figure","id":"p1066","attributes":{"width":400,"height":400,"x_range":{"type":"object","name":"DataRange1d","id":"p1068"},"y_range":{"type":"object","name":"DataRange1d","id":"p1067"},"x_scale":{"type":"object","name":"LinearScale","id":"p1080"},"y_scale":{"type":"object","name":"LinearScale","id":"p1082"},"title":{"type":"object","name":"Title","id":"p1069","attributes":{"text":"mESC total cDNA Ewsr1 (88853580c2)"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1119","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1113","attributes":{"selected":{"type":"object","name":"Selection","id":"p1114","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1115"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcC50byEp0kRwLnRvISnSRHAudG8hKdJFcC50byEp0kVwLnRvISnSRXAudG8hKdJGcC50byEp0kZwLnRvISnSRnAudG8hKdJHcC50byEp0kdwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"rkfhehTuMUC4HoXrUfgxQDMzMzMz8zFAZmZmZmbmMkBmZmZmZuYyQDMzMzMz8zJAZmZmZmbmM0D2KFyPwvUzQHsUrkfh+jNAexSuR+H6NED2KFyPwvU0QI/C9ShcDzVA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1120","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1121"}}},"glyph":{"type":"object","name":"Circle","id":"p1116","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Circle","id":"p1117","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Circle","id":"p1118","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1128","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1122","attributes":{"selected":{"type":"object","name":"Selection","id":"p1123","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1124"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcDQLjFW7WASwOiLpSczeBPA/+gZ+XiPFMAWRo7KvqYVwC6jApwEvhbARQB3bUrVF8BcXes+kOwYwHO6XxDWAxrAihfU4RsbG8CidEizYTIcwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"f9xrLiTtMUAg3KlbNzQyQMHb54hKezJAYdsltl3CMkAC22PjcAkzQKPaoRCEUDNAQ9rfPZeXM0Dk2R1rqt4zQITZW5i9JTRAJdmZxdBsNEDG2Nfy47M0QGbYFSD3+jRA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1129","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1130"}}},"glyph":{"type":"object","name":"Line","id":"p1125","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4"}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1126","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.1}},"muted_glyph":{"type":"object","name":"Line","id":"p1127","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1072","attributes":{"tools":[{"id":"p1098"},{"id":"p1099"},{"id":"p1100"},{"type":"object","name":"SaveTool","id":"p1102"},{"id":"p1103"},{"id":"p1104"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1091","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1092","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1094"},"axis_label":"Ct","major_label_policy":{"type":"object","name":"AllLabels","id":"p1093"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1084","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1085","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1087"},"axis_label":"Log2Dil","major_label_policy":{"type":"object","name":"AllLabels","id":"p1086"}}}],"center":[{"type":"object","name":"Grid","id":"p1090","attributes":{"axis":{"id":"p1084"}}},{"type":"object","name":"Grid","id":"p1097","attributes":{"dimension":1,"axis":{"id":"p1091"}}}]}},0,1],[{"type":"object","name":"Figure","id":"p1131","attributes":{"width":400,"height":400,"x_range":{"type":"object","name":"DataRange1d","id":"p1133"},"y_range":{"type":"object","name":"DataRange1d","id":"p1132"},"x_scale":{"type":"object","name":"LinearScale","id":"p1145"},"y_scale":{"type":"object","name":"LinearScale","id":"p1147"},"title":{"type":"object","name":"Title","id":"p1134","attributes":{"text":"mESC total cDNA Fus (112734868c1)"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1184","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1178","attributes":{"selected":{"type":"object","name":"Selection","id":"p1179","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1180"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcC50byEp0kRwLnRvISnSRHAudG8hKdJFcC50byEp0kVwLnRvISnSRXAudG8hKdJGcC50byEp0kZwLnRvISnSRnAudG8hKdJHcC50byEp0kdwA=="},"shape":[11],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"w/UoXI+CMUAK16NwPYoxQM3MzMzMjDFAPQrXo3B9MkCF61G4HoUyQArXo3A9ijJASOF6FK6HM0DXo3A9CpczQNejcD0KlzNApHA9CtejNEBmZmZmZqY0QA=="},"shape":[11],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1185","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1186"}}},"glyph":{"type":"object","name":"Circle","id":"p1181","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Circle","id":"p1182","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Circle","id":"p1183","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1193","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1187","attributes":{"selected":{"type":"object","name":"Selection","id":"p1188","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1189"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcDsBPC32nwSwCA4I+sNsBPAUmtWHkHjFMCGnolRdBYWwLnRvISnSRfA7ATwt9p8GMAgOCPrDbAZwFNrVh5B4xrAhp6JUXQWHMC50byEp0kdwA=="},"shape":[11],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"2mrwHIGCMUBafg/WFNIxQNqRLo+oITJAWqVNSDxxMkDauGwB0MAyQFrMi7pjEDNA2t+qc/dfM0Bb88ksi68zQNsG6eUe/zNAWxoIn7JONEDbLSdYRp40QA=="},"shape":[11],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1194","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1195"}}},"glyph":{"type":"object","name":"Line","id":"p1190","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4"}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1191","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.1}},"muted_glyph":{"type":"object","name":"Line","id":"p1192","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1137","attributes":{"tools":[{"id":"p1163"},{"id":"p1164"},{"id":"p1165"},{"type":"object","name":"SaveTool","id":"p1167"},{"id":"p1168"},{"id":"p1169"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1156","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1157","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1159"},"axis_label":"Ct","major_label_policy":{"type":"object","name":"AllLabels","id":"p1158"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1149","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1150","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1152"},"axis_label":"Log2Dil","major_label_policy":{"type":"object","name":"AllLabels","id":"p1151"}}}],"center":[{"type":"object","name":"Grid","id":"p1155","attributes":{"axis":{"id":"p1149"}}},{"type":"object","name":"Grid","id":"p1162","attributes":{"dimension":1,"axis":{"id":"p1156"}}}]}},1,0],[{"type":"object","name":"Figure","id":"p1196","attributes":{"width":400,"height":400,"x_range":{"type":"object","name":"DataRange1d","id":"p1198"},"y_range":{"type":"object","name":"DataRange1d","id":"p1197"},"x_scale":{"type":"object","name":"LinearScale","id":"p1210"},"y_scale":{"type":"object","name":"LinearScale","id":"p1212"},"title":{"type":"object","name":"Title","id":"p1199","attributes":{"text":"mESC total cDNA Fus (15029724a1)"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1249","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1243","attributes":{"selected":{"type":"object","name":"Selection","id":"p1244","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1245"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcC50byEp0kRwLnRvISnSRHAudG8hKdJFcC50byEp0kVwLnRvISnSRXAudG8hKdJGcC50byEp0kZwLnRvISnSRnAudG8hKdJHcC50byEp0kdwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"MzMzMzOzMUD2KFyPwrUxQHE9CtejsDFAZmZmZmamMkCkcD0K16MyQPYoXI/CtTJAZmZmZmamM0D2KFyPwrUzQDMzMzMzszNA7FG4HoWrNEBxPQrXo7A0QD0K16NwvTRA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1250","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1251"}}},"glyph":{"type":"object","name":"Circle","id":"p1246","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Circle","id":"p1247","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Circle","id":"p1248","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1258","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1252","attributes":{"selected":{"type":"object","name":"Selection","id":"p1253","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1254"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcDQLjFW7WASwOiLpSczeBPA/+gZ+XiPFMAWRo7KvqYVwC6jApwEvhbARQB3bUrVF8BcXes+kOwYwHO6XxDWAxrAihfU4RsbG8CidEizYTIcwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"fIZdAXKvMUDoDPA0Z/UxQFWTgmhcOzJAwRkVnFGBMkAuoKfPRscyQJomOgM8DTNABq3MNjFTM0ByM19qJpkzQN+58Z0b3zNAS0CE0RAlNEC4xhYFBms0QCRNqTj7sDRA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1259","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1260"}}},"glyph":{"type":"object","name":"Line","id":"p1255","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4"}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1256","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.1}},"muted_glyph":{"type":"object","name":"Line","id":"p1257","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1202","attributes":{"tools":[{"id":"p1228"},{"id":"p1229"},{"id":"p1230"},{"type":"object","name":"SaveTool","id":"p1232"},{"id":"p1233"},{"id":"p1234"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1221","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1222","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1224"},"axis_label":"Ct","major_label_policy":{"type":"object","name":"AllLabels","id":"p1223"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1214","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1215","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1217"},"axis_label":"Log2Dil","major_label_policy":{"type":"object","name":"AllLabels","id":"p1216"}}}],"center":[{"type":"object","name":"Grid","id":"p1220","attributes":{"axis":{"id":"p1214"}}},{"type":"object","name":"Grid","id":"p1227","attributes":{"dimension":1,"axis":{"id":"p1221"}}}]}},1,1],[{"type":"object","name":"Figure","id":"p1261","attributes":{"width":400,"height":400,"x_range":{"type":"object","name":"DataRange1d","id":"p1263"},"y_range":{"type":"object","name":"DataRange1d","id":"p1262"},"x_scale":{"type":"object","name":"LinearScale","id":"p1275"},"y_scale":{"type":"object","name":"LinearScale","id":"p1277"},"title":{"type":"object","name":"Title","id":"p1264","attributes":{"text":"mESC total cDNA Taf15 (141803447c1)"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1314","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1308","attributes":{"selected":{"type":"object","name":"Selection","id":"p1309","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1310"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcC50byEp0kRwLnRvISnSRHAudG8hKdJFcC50byEp0kVwLnRvISnSRXAudG8hKdJGcC50byEp0kZwLnRvISnSRnAudG8hKdJHcC50byEp0kdwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"4XoUrkchM0DXo3A9ChczQM3MzMzMDDNASOF6FK4HNEDD9ShcjwI0QM3MzMzMDDRAzczMzMwMNUCamZmZmRk1QBSuR+F6FDVASOF6FK4HNkDD9ShcjwI2QIXrUbgeBTZA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1315","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1316"}}},"glyph":{"type":"object","name":"Circle","id":"p1311","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Circle","id":"p1312","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Circle","id":"p1313","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1323","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1317","attributes":{"selected":{"type":"object","name":"Selection","id":"p1318","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1319"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcDQLjFW7WASwOiLpSczeBPA/+gZ+XiPFMAWRo7KvqYVwC6jApwEvhbARQB3bUrVF8BcXes+kOwYwHO6XxDWAxrAihfU4RsbG8CidEizYTIcwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"YJ6ofyMUM0DrqSYF0VgzQHa1pIp+nTNAAsEiECziM0CMzKCV2SY0QBjYHhuHazRAo+OcoDSwNEAu7xom4vQ0QLn6mKuPOTVARAYXMT1+NUDPEZW26sI1QFodEzyYBzZA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1324","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1325"}}},"glyph":{"type":"object","name":"Line","id":"p1320","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4"}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1321","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.1}},"muted_glyph":{"type":"object","name":"Line","id":"p1322","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1267","attributes":{"tools":[{"id":"p1293"},{"id":"p1294"},{"id":"p1295"},{"type":"object","name":"SaveTool","id":"p1297"},{"id":"p1298"},{"id":"p1299"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1286","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1287","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1289"},"axis_label":"Ct","major_label_policy":{"type":"object","name":"AllLabels","id":"p1288"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1279","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1280","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1282"},"axis_label":"Log2Dil","major_label_policy":{"type":"object","name":"AllLabels","id":"p1281"}}}],"center":[{"type":"object","name":"Grid","id":"p1285","attributes":{"axis":{"id":"p1279"}}},{"type":"object","name":"Grid","id":"p1292","attributes":{"dimension":1,"axis":{"id":"p1286"}}}]}},2,0],[{"type":"object","name":"Figure","id":"p1326","attributes":{"width":400,"height":400,"x_range":{"type":"object","name":"DataRange1d","id":"p1328"},"y_range":{"type":"object","name":"DataRange1d","id":"p1327"},"x_scale":{"type":"object","name":"LinearScale","id":"p1340"},"y_scale":{"type":"object","name":"LinearScale","id":"p1342"},"title":{"type":"object","name":"Title","id":"p1329","attributes":{"text":"mESC total cDNA Taf15 (141803447c2)"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1379","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1373","attributes":{"selected":{"type":"object","name":"Selection","id":"p1374","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1375"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcC50byEp0kRwLnRvISnSRHAudG8hKdJFcC50byEp0kVwLnRvISnSRXAudG8hKdJGcC50byEp0kZwLnRvISnSRnAudG8hKdJHcC50byEp0kdwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"pHA9CtfjMkCkcD0K1+MyQGZmZmZm5jJA16NwPQrXM0CkcD0K1+MzQJqZmZmZ2TNAmpmZmZnZNEApXI/C9eg0QGZmZmZm5jRAFK5H4XrUNUAfhetRuN41QDMzMzMz8zVA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1380","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1381"}}},"glyph":{"type":"object","name":"Circle","id":"p1376","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Circle","id":"p1377","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Circle","id":"p1378","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1388","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1382","attributes":{"selected":{"type":"object","name":"Selection","id":"p1383","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1384"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcDQLjFW7WASwOiLpSczeBPA/+gZ+XiPFMAWRo7KvqYVwC6jApwEvhbARQB3bUrVF8BcXes+kOwYwHO6XxDWAxrAihfU4RsbG8CidEizYTIcwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"lYqzD5/hMkBUD92OaiczQBSUBg42bTNA0xgwjQGzM0CSnVkMzfgzQFIig4uYPjRAEaesCmSENEDQK9aJL8o0QJCw/wj7DzVATzUpiMZVNUAOulIHkps1QM4+fIZd4TVA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1389","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1390"}}},"glyph":{"type":"object","name":"Line","id":"p1385","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4"}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1386","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.1}},"muted_glyph":{"type":"object","name":"Line","id":"p1387","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1332","attributes":{"tools":[{"id":"p1358"},{"id":"p1359"},{"id":"p1360"},{"type":"object","name":"SaveTool","id":"p1362"},{"id":"p1363"},{"id":"p1364"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1351","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1352","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1354"},"axis_label":"Ct","major_label_policy":{"type":"object","name":"AllLabels","id":"p1353"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1344","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1345","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1347"},"axis_label":"Log2Dil","major_label_policy":{"type":"object","name":"AllLabels","id":"p1346"}}}],"center":[{"type":"object","name":"Grid","id":"p1350","attributes":{"axis":{"id":"p1344"}}},{"type":"object","name":"Grid","id":"p1357","attributes":{"dimension":1,"axis":{"id":"p1351"}}}]}},2,1],[{"type":"object","name":"Figure","id":"p1391","attributes":{"width":400,"height":400,"x_range":{"type":"object","name":"DataRange1d","id":"p1393"},"y_range":{"type":"object","name":"DataRange1d","id":"p1392"},"x_scale":{"type":"object","name":"LinearScale","id":"p1405"},"y_scale":{"type":"object","name":"LinearScale","id":"p1407"},"title":{"type":"object","name":"Title","id":"p1394","attributes":{"text":"mESC total cDNA Tsix exon4"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1444","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1438","attributes":{"selected":{"type":"object","name":"Selection","id":"p1439","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1440"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcC50byEp0kRwLnRvISnSRHAudG8hKdJFcC50byEp0kVwLnRvISnSRXAudG8hKdJGcC50byEp0kZwLnRvISnSRnAudG8hKdJHcC50byEp0kdwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"cT0K16MwOUAfhetRuB45QClcj8L1KDlAFK5H4XoUOkDNzMzMzAw6QOxRuB6FKzpAw/UoXI8CO0DXo3A9Chc7QArXo3A9CjtArkfhehTuO0D2KFyPwvU7QK5H4XoU7jtA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1445","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1446"}}},"glyph":{"type":"object","name":"Circle","id":"p1441","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Circle","id":"p1442","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Circle","id":"p1443","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1453","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1447","attributes":{"selected":{"type":"object","name":"Selection","id":"p1448","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1449"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcDQLjFW7WASwOiLpSczeBPA/+gZ+XiPFMAWRo7KvqYVwC6jApwEvhbARQB3bUrVF8BcXes+kOwYwHO6XxDWAxrAihfU4RsbG8CidEizYTIcwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"veZC0pQqOUA4OR4tfWs5QLKL+YdlrDlALN7U4k3tOUCnMLA9Ni46QCKDi5gebzpAnNVm8wawOkAWKEJO7/A6QJF6HanXMTtAC834A8ByO0CGH9ReqLM7QAByr7mQ9DtA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1454","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1455"}}},"glyph":{"type":"object","name":"Line","id":"p1450","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4"}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1451","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.1}},"muted_glyph":{"type":"object","name":"Line","id":"p1452","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1397","attributes":{"tools":[{"id":"p1423"},{"id":"p1424"},{"id":"p1425"},{"type":"object","name":"SaveTool","id":"p1427"},{"id":"p1428"},{"id":"p1429"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1416","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1417","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1419"},"axis_label":"Ct","major_label_policy":{"type":"object","name":"AllLabels","id":"p1418"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1409","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1410","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1412"},"axis_label":"Log2Dil","major_label_policy":{"type":"object","name":"AllLabels","id":"p1411"}}}],"center":[{"type":"object","name":"Grid","id":"p1415","attributes":{"axis":{"id":"p1409"}}},{"type":"object","name":"Grid","id":"p1422","attributes":{"dimension":1,"axis":{"id":"p1416"}}}]}},3,0]]}}],"callbacks":{"type":"map"}}};
+  const render_items = [{"docid":"1e64ec87-b0cf-4447-b4f2-c330762f9a52","roots":{"p1603":"f8baebd2-300d-48a3-8bcd-3feb6672f89f"},"root_ids":["p1603"]}];
+  root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
+  }
+  if (root.Bokeh !== undefined) {
+    embed_document(root);
+  } else {
+    let attempts = 0;
+    const timer = setInterval(function(root) {
+      if (root.Bokeh !== undefined) {
+        clearInterval(timer);
+        embed_document(root);
+      } else {
+        attempts++;
+        if (attempts > 100) {
+          clearInterval(timer);
+          console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
+        }
+      }
+    }, 10, root)
+  }
+})(window);
+</script></div>
+</div>
+<p>Just looking at Tsix exon4, we can see that the Ct values are reasonable, the replicate wells cluster closely together, and the threshold filtering applied during the calculation did not exclude any samples:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bokeh</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">plot_dict</span><span class="p">[</span><span class="s1">&#39;mESC total cDNA&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div id="b8b9f967-03b8-41bb-834c-d0498d7effee" data-root-id="p1391" style="display: contents;"></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="output_javascript"></div>
+<script type="text/javascript">
+var element = document.currentScript.previousSibling.previousSibling;
+(function(root) {
+  function embed_document(root) {
+  const docs_json = {"14046ce8-ac63-48ed-b3ff-135c63465cf8":{"version":"3.1.1","title":"Bokeh Application","defs":[],"roots":[{"type":"object","name":"Figure","id":"p1391","attributes":{"width":400,"height":400,"x_range":{"type":"object","name":"DataRange1d","id":"p1393"},"y_range":{"type":"object","name":"DataRange1d","id":"p1392"},"x_scale":{"type":"object","name":"LinearScale","id":"p1405"},"y_scale":{"type":"object","name":"LinearScale","id":"p1407"},"title":{"type":"object","name":"Title","id":"p1394","attributes":{"text":"mESC total cDNA Tsix exon4"}},"renderers":[{"type":"object","name":"GlyphRenderer","id":"p1444","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1438","attributes":{"selected":{"type":"object","name":"Selection","id":"p1439","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1440"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcC50byEp0kRwLnRvISnSRHAudG8hKdJFcC50byEp0kVwLnRvISnSRXAudG8hKdJGcC50byEp0kZwLnRvISnSRnAudG8hKdJHcC50byEp0kdwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"cT0K16MwOUAfhetRuB45QClcj8L1KDlAFK5H4XoUOkDNzMzMzAw6QOxRuB6FKzpAw/UoXI8CO0DXo3A9Chc7QArXo3A9CjtArkfhehTuO0D2KFyPwvU7QK5H4XoU7jtA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1445","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1446"}}},"glyph":{"type":"object","name":"Circle","id":"p1441","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"fill_color":{"type":"value","value":"#1f77b4"}}},"nonselection_glyph":{"type":"object","name":"Circle","id":"p1442","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.1},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.1},"hatch_alpha":{"type":"value","value":0.1}}},"muted_glyph":{"type":"object","name":"Circle","id":"p1443","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":{"type":"value","value":"#1f77b4"},"line_alpha":{"type":"value","value":0.2},"fill_color":{"type":"value","value":"#1f77b4"},"fill_alpha":{"type":"value","value":0.2},"hatch_alpha":{"type":"value","value":0.2}}}}},{"type":"object","name":"GlyphRenderer","id":"p1453","attributes":{"data_source":{"type":"object","name":"ColumnDataSource","id":"p1447","attributes":{"selected":{"type":"object","name":"Selection","id":"p1448","attributes":{"indices":[],"line_indices":[]}},"selection_policy":{"type":"object","name":"UnionRenderers","id":"p1449"},"data":{"type":"map","entries":[["x",{"type":"ndarray","array":{"type":"bytes","data":"udG8hKdJEcDQLjFW7WASwOiLpSczeBPA/+gZ+XiPFMAWRo7KvqYVwC6jApwEvhbARQB3bUrVF8BcXes+kOwYwHO6XxDWAxrAihfU4RsbG8CidEizYTIcwLnRvISnSR3A"},"shape":[12],"dtype":"float64","order":"little"}],["y",{"type":"ndarray","array":{"type":"bytes","data":"veZC0pQqOUA4OR4tfWs5QLKL+YdlrDlALN7U4k3tOUCnMLA9Ni46QCKDi5gebzpAnNVm8wawOkAWKEJO7/A6QJF6HanXMTtAC834A8ByO0CGH9ReqLM7QAByr7mQ9DtA"},"shape":[12],"dtype":"float64","order":"little"}]]}}},"view":{"type":"object","name":"CDSView","id":"p1454","attributes":{"filter":{"type":"object","name":"AllIndices","id":"p1455"}}},"glyph":{"type":"object","name":"Line","id":"p1450","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4"}},"nonselection_glyph":{"type":"object","name":"Line","id":"p1451","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.1}},"muted_glyph":{"type":"object","name":"Line","id":"p1452","attributes":{"x":{"type":"field","field":"x"},"y":{"type":"field","field":"y"},"line_color":"#1f77b4","line_alpha":0.2}}}}],"toolbar":{"type":"object","name":"Toolbar","id":"p1397","attributes":{"tools":[{"type":"object","name":"PanTool","id":"p1423"},{"type":"object","name":"WheelZoomTool","id":"p1424"},{"type":"object","name":"BoxZoomTool","id":"p1425","attributes":{"overlay":{"type":"object","name":"BoxAnnotation","id":"p1426","attributes":{"syncable":false,"level":"overlay","visible":false,"left_units":"canvas","right_units":"canvas","bottom_units":"canvas","top_units":"canvas","line_color":"black","line_alpha":1.0,"line_width":2,"line_dash":[4,4],"fill_color":"lightgrey","fill_alpha":0.5}}}},{"type":"object","name":"SaveTool","id":"p1427"},{"type":"object","name":"ResetTool","id":"p1428"},{"type":"object","name":"HelpTool","id":"p1429"}]}},"toolbar_location":null,"left":[{"type":"object","name":"LinearAxis","id":"p1416","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1417","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1419"},"axis_label":"Ct","major_label_policy":{"type":"object","name":"AllLabels","id":"p1418"}}}],"below":[{"type":"object","name":"LinearAxis","id":"p1409","attributes":{"ticker":{"type":"object","name":"BasicTicker","id":"p1410","attributes":{"mantissas":[1,2,5]}},"formatter":{"type":"object","name":"BasicTickFormatter","id":"p1412"},"axis_label":"Log2Dil","major_label_policy":{"type":"object","name":"AllLabels","id":"p1411"}}}],"center":[{"type":"object","name":"Grid","id":"p1415","attributes":{"axis":{"id":"p1409"}}},{"type":"object","name":"Grid","id":"p1422","attributes":{"dimension":1,"axis":{"id":"p1416"}}}]}}],"callbacks":{"type":"map"}}};
+  const render_items = [{"docid":"14046ce8-ac63-48ed-b3ff-135c63465cf8","roots":{"p1391":"b8b9f967-03b8-41bb-834c-d0498d7effee"},"root_ids":["p1391"]}];
+  root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
+  }
+  if (root.Bokeh !== undefined) {
+    embed_document(root);
+  } else {
+    let attempts = 0;
+    const timer = setInterval(function(root) {
+      if (root.Bokeh !== undefined) {
+        clearInterval(timer);
+        embed_document(root);
+      } else {
+        attempts++;
+        if (attempts > 100) {
+          clearInterval(timer);
+          console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
+        }
+      }
+    }, 10, root)
+  }
+})(window);
+</script></div>
+</div>
+<p>Since we applied a standard deviation threshold, <code class="docutils literal notranslate"><span class="pre">efficiency()</span></code> called <code class="docutils literal notranslate"><span class="pre">averager()</span></code> to remove poorly replicating wells. These wells can be found in the droppedWells.txt log file:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;droppedWells.txt&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Outlier Wells Dropped:
+mESC total cDNA_160Fus (112734868c1) - 1
+
+Samples Removed:
+
+</pre></div></div>
+</div>
+<p>One of the Fus (112734868c1) wells was removed at the highest dilution level. This likely indicates a pipetting error and is not a serious cause for concern. No samples were removed entirely, so the full standard curve was analyzed for each primer set.</p>
+</section>
+<section id="Returning-the-linear-model">
+<h2>Returning the linear model<a class="headerlink" href="#Returning-the-linear-model" title="Permalink to this heading"></a></h2>
+<p>Occasionally, we may want to know the exact function that <code class="docutils literal notranslate"><span class="pre">efficiency()</span></code> fit for a given standard curve. This is possible by setting returnmodel to True.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_dict</span><span class="p">,</span> <span class="n">eff_df</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">equipt</span><span class="o">.</span><span class="n">efficiency</span><span class="p">(</span><span class="n">df</span><span class="p">,</span>
+                               <span class="n">samples</span><span class="p">,</span>
+                               <span class="n">returnmodel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="o">**</span><span class="n">eff_kwargs</span><span class="p">)</span>
+
+<span class="n">model</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Name</th>
+      <th>Primer</th>
+      <th>Coefficient</th>
+      <th>Intercept</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>mESC total cDNA</td>
+      <td>Ewsr1 (6679715a1)</td>
+      <td>-1.035</td>
+      <td>14.411</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>mESC total cDNA</td>
+      <td>Ewsr1 (88853580c2)</td>
+      <td>-1.018</td>
+      <td>13.527</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>mESC total cDNA</td>
+      <td>Fus (112734868c1)</td>
+      <td>-1.036</td>
+      <td>13.032</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>mESC total cDNA</td>
+      <td>Fus (15029724a1)</td>
+      <td>-1.002</td>
+      <td>13.355</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>mESC total cDNA</td>
+      <td>Taf15 (141803447c1)</td>
+      <td>-0.984</td>
+      <td>14.827</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>mESC total cDNA</td>
+      <td>Taf15 (141803447c2)</td>
+      <td>-1.000</td>
+      <td>14.561</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>mESC total cDNA</td>
+      <td>Tsix exon4</td>
+      <td>-0.930</td>
+      <td>21.148</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The model dataframe contains the sample-primer pair as well as the slope and y-intercept of the linear function.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> watermark
+<span class="o">%</span><span class="k">watermark</span> -v -p bokeh,equipt,jupyterlab
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Python implementation: CPython
+Python version       : 3.9.17
+IPython version      : 8.12.0
+
+bokeh     : 3.1.1
+equipt    : 1.0.0
+jupyterlab: 3.6.3
+
+</pre></div></div>
+</div>
+</section>
 </section>
 
 
@@ -121,7 +963,34 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+   
+
+  <style>
+  /* Sidebar header (and topbar for mobile) */
+  .wy-side-nav-search, .wy-nav-top {
+    background: #86181A;
+  }
+  /* Sidebar background color */
+  .wy-nav-side {
+    background: #B94C3F;
+  }
+  /* Sidebar text color */
+  .wy-side-nav-search .icon {
+    color: #B94C3F;
+  }
+  /* Sidebar label color */
+  .wy-menu-vertical .caption-text {
+    color: #86181A; /* Change this to the desired text color */
+  }
+  /* Change text color of specific category */
+  .wy-menu-vertical li,
+  .wy-menu-vertical a {
+    color: #000000; /* Change this to the desired text color */
+  }
+</style>
+}
+
 
 </body>
 </html>
