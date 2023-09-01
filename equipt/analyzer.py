@@ -75,9 +75,14 @@ def averager(ct_data,
     ct_data : a dataframe
         Output of namer().
         
-    thresh : float
+    reps : int
+        The number of replicate wells in the sample. Used to flag sample-
+        primer pairs where more than half the wells have been removed. Is
+        not used if thresh == None.
+
+    thresh : float or None
         Highest acceptable standard deviation for a set of sample-primer
-        replicate wells. Default 0.1
+        replicate wells. If set to None no wells are removed. Default 0.1
         
     Returns
     _______
