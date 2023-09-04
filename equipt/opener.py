@@ -22,8 +22,7 @@ def lc480_importer(ct_file):
     if ct_file[-4:] == 'xlsx':
         return pd.read_excel(ct_file, 
                              header=1, 
-                             usecols=['Pos','Cp'],
-                             sep='\t')
+                             usecols=['Pos','Cp'],)
     else:
         return pd.read_csv(ct_file, 
                              header=1, 

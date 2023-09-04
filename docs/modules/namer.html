@@ -57,8 +57,8 @@
 <li class="toctree-l1"><a class="reference internal" href="deltact.html">deltact</a></li>
 <li class="toctree-l1"><a class="reference internal" href="efficiency.html">efficiency</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">namer</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Using-namer()-for-the-Lightcycler-480">Using namer() for the Lightcycler 480</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Using-a-custom-importer-function-with-namer()">Using a custom importer function with namer()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-namer-for-the-Lightcycler-480">Using namer for the Lightcycler 480</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-a-custom-importer-function-with-namer">Using a custom importer function with namer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Important-Caveats">Important Caveats</a></li>
 </ul>
 </li>
@@ -93,8 +93,8 @@
 <p><code class="docutils literal notranslate"><span class="pre">namer()</span></code> is the function that imports qPCR data and labels wells. The output of <code class="docutils literal notranslate"><span class="pre">namer()</span></code> is used for all subsequent equipt functions.</p>
 <p>The first step of <code class="docutils literal notranslate"><span class="pre">namer()</span></code> is a function that imports the Ct values from an .xlsx or .csv file. In the current distribution this is performed by the function <code class="docutils literal notranslate"><span class="pre">lc480_importer()</span></code>, which is specific to the data output of the Roche LightCycler 480. For other instruments and file formats the user can write their own importer and supply it to namer. The only requirements are that it outputs a Pandas Dataframe with one column named ‘Pos’ that contains well positions, and another named ‘Cp’ that
 contains the Ct values. <code class="docutils literal notranslate"><span class="pre">namer()</span></code> does not use the ‘Pos’ column, but it allows the user to easily verify that wells were accurately named.</p>
-<section id="Using-namer()-for-the-Lightcycler-480">
-<h2>Using namer() for the Lightcycler 480<a class="headerlink" href="#Using-namer()-for-the-Lightcycler-480" title="Permalink to this heading"></a></h2>
+<section id="Using-namer-for-the-Lightcycler-480">
+<h2>Using namer for the Lightcycler 480<a class="headerlink" href="#Using-namer-for-the-Lightcycler-480" title="Permalink to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -377,8 +377,8 @@ importer : a custom importer function or None
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">namer()</span></code> has correctly labeled the primer, assigned sample names with the dilution factor after an underscore, and created a column called ‘NamePrim’ that allows for replicate wells to be easily detected. This output can be supplied to any of the other tools in equipt.</p>
 </section>
-<section id="Using-a-custom-importer-function-with-namer()">
-<h2>Using a custom importer function with namer()<a class="headerlink" href="#Using-a-custom-importer-function-with-namer()" title="Permalink to this heading"></a></h2>
+<section id="Using-a-custom-importer-function-with-namer">
+<h2>Using a custom importer function with namer<a class="headerlink" href="#Using-a-custom-importer-function-with-namer" title="Permalink to this heading"></a></h2>
 <p>For data from an instrument other than the LightCycler 480, the user should write a custom import function. For this example, I have taken the exact data used above but reformatted it for a hypothetical qPCR instrument:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:

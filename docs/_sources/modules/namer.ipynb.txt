@@ -25,7 +25,7 @@
     "tags": []
    },
    "source": [
-    "## Using namer() for the Lightcycler 480"
+    "## Using namer for the Lightcycler 480"
    ]
   },
   {
@@ -404,7 +404,7 @@
    "id": "2d0ed4af-d944-4140-92da-23a5112ab7bd",
    "metadata": {},
    "source": [
-    "## Using a custom importer function with namer()"
+    "## Using a custom importer function with namer"
    ]
   },
   {
