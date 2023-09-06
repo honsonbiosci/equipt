@@ -50,7 +50,7 @@ exclude_patterns = []
 #
 html_theme = 'sphinx_rtd_theme'
 html_favicon = 'images/favicon.ico'
-html_logo = 'images/logo.svg'
+html_logo = 'images/logo.png'
 
 html_theme_options = {
     "logo_only": True,
