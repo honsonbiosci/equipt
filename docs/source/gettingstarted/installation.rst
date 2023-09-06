@@ -3,7 +3,7 @@ Installation
 
 You can install equipt using pip:
 
-	$ pip install git+https://github.com/honsonbiosci/equipt.git
+	``$ pip install equipt``
 
 Dependencies
 ------------

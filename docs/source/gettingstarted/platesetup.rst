@@ -1,7 +1,7 @@
 Plate Set-Up
 ============
 
-Equipt allows for a variety of plate set-ups, but has some intentional limitations. Standardizing plate loading makes it easier to supply a limited number of arguments to equipt, reducing the likelihood of human error. Any plate format is acceptable as long as the following conditions are met. 2, 3, or 4 replicates are permitted in either a square or line configuration, as shown in the image below.
+Equipt allows for a variety of plate arrangements, but has some intentional limitations. Standardizing plate loading makes it easier to supply a limited number of arguments to equipt, reducing the likelihood of human error. Any plate format is acceptable as long as the following conditions are met. 2, 3, or 4 replicates are permitted in either a square or line configuration, as shown in the image below.
 
 .. image:: ../images/23.08.28_qPCR-Layout.png
    :width: 600
@@ -24,4 +24,4 @@ Primers do not need to be on separate rows, but each primer must have a continuo
 
 The intention behind this scheme is that primer master mixes are prepared in 1.7mL tubes and aliquoted into strip tubes or a 96-well plate. Samples are diluted in strip tubes and then pipetted with a multichannel into the aliquots of primer master mix. After the samples have been thoroughly mixed then spun back down to the bottom of the tube, primer-sample mixes are pipetted with a multichannel into replicate wells in one of the conformations above. 
 
-Currently, each primer must be used with every sample. If you plan to do an experiment where different samples have different primers, the plate should be divided to follow the equipt loading conventions for each set of primer-sample pairs. To understand how to communicate this set-up to equipt, and for additional details on importing qPCR data, see the documentation for `namer()`.
+Currently, each primer must be used with every sample. If you plan to do an experiment where different samples have different primers, the plate should be divided to follow the equipt loading conventions for each set of primer-sample pairs. To understand how to communicate this set-up to equipt, and for additional details on importing qPCR data, see the documentation for ``namer()``.
