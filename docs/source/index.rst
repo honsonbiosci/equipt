@@ -3,8 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Equipt: Tools for qPCR Analysis
-===============================
+.. |ico1| image:: images/pyrrfavicon.png
+   :width: 100
+
+|ico1| Equipt: Tools for qPCR Analysis
+======================================
 
 .. toctree::
    :maxdepth: 1
