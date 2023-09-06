@@ -9,17 +9,6 @@ from sklearn.metrics import r2_score
 import bokeh.plotting as plt
 from bokeh.layouts import gridplot
 
-import pandas as pd
-import numpy as np
-
-from itertools import chain
-
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
-
-import bokeh.plotting as plt
-from bokeh.layouts import gridplot
-
 def avg_base(ct_data):
     '''
     Computes average Ct values and errors for sample-primer pairs
@@ -392,7 +381,6 @@ def deltact(ct_data,
 
 def efficiency(ct_in, # output from namer
               with_dil,
-              reps,
               returnmodel=False, # Whether or not to output the linear model in full
               **kwargs):    
     
