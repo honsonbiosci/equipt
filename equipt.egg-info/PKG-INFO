@@ -6,7 +6,7 @@ Author: Drew Honson
 Author-email: honsonbiosci@gmail.com
 Classifier: Programming Language :: Python :: 3
 Classifier: Operating System :: OS Independent
-Description-Content-Type: ext/markdown
+Description-Content-Type: text/markdown
 License-File: LICENSE
 
 # equipt
