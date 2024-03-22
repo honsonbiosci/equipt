@@ -211,6 +211,9 @@ def namer(ct_file,
     ct_data['NamePrim'] = ct_data['Name'] + ct_data['Primer']
     
     ct_data = ct_data[ct_data['Cp'] != 'exclude']
-    ct_data = ct_data.astype({'Cp':float})
+    ct_data = ct_data.astype({'Cp':float,
+                              'Name':str,
+                              'Primer':str,
+                              'NamePrim':str})
         
     return ct_data

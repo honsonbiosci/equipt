@@ -34,6 +34,12 @@ def avg_base(ct_data):
     avgdf = pd.DataFrame(np.zeros([len(uniques),5]),
                         columns=['Primer','Name','NamePrim','AvgCt','StdCt'])
     
+    avgdf = avgdf.astype({'AvgCt':float,
+                          'StdCt':float,
+                          'Name':str,
+                          'Primer':str,
+                          'NamePrim':str})
+    
     # Iterate through primer-sample pairs to get averages
     for i, u in enumerate(uniques):
         # Subset dataframe

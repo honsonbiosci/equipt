@@ -22,8 +22,7 @@ def lc480_importer(ct_file):
     if ct_file[-4:] == 'xlsx':
         return pd.read_excel(ct_file, 
                              header=1, 
-                             usecols=['Pos','Cp'],
-                             sep='\t')
+                             usecols=['Pos','Cp'],)
     else:
         return pd.read_csv(ct_file, 
                              header=1, 
@@ -130,7 +129,6 @@ def namer(ct_file,
                 update_ls.append('_'.join([i,str(kwargs['dil_rest'])]))
         
         samples = update_ls
-        print(samples)
         
     else:
         pass
@@ -213,6 +211,9 @@ def namer(ct_file,
     ct_data['NamePrim'] = ct_data['Name'] + ct_data['Primer']
     
     ct_data = ct_data[ct_data['Cp'] != 'exclude']
-    ct_data = ct_data.astype({'Cp':float})
+    ct_data = ct_data.astype({'Cp':float,
+                              'Name':str,
+                              'Primer':str,
+                              'NamePrim':str})
         
     return ct_data
