@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>efficiency &mdash; equipt 0.0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+
+  
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -100,7 +102,7 @@
 <p>The following section provides a detailed explanation of efficiency testing. To jump directly to the usage of <code class="docutils literal notranslate"><span class="pre">efficiency()</span></code>, jump to “Using namer to get a dataframe for efficiency”.</p>
 <section id="What-is-efficiency?">
 <h2>What is efficiency?<a class="headerlink" href="#What-is-efficiency?" title="Permalink to this heading"></a></h2>
-<p>Efficiency is the most common metric used to determine whether primers are properly amplifying exponentially. It is calculated from a standard curve. For each two-fold dilution in the standard curve, the Ct value should increase by 1. In other words, when Ct values are plotted against <span class="math notranslate nohighlight">\(log_2(dilution)\)</span>, the absolute value of the slope should be -1. Efficiency is calculated by converting the slope to the fraction or percentage of product amplified.</p>
+<p>Efficiency is the most common metric used to determine whether primers are properly amplifying exponentially. It is calculated from a standard curve. For each two-fold dilution in the standard curve, the Ct value should increase by 1. In other words, when Ct values are plotted against <span class="math notranslate nohighlight">\(log_2(dilution)\)</span>, the absolute value of the slope should be 1. Efficiency is calculated by converting the slope to the fraction or percentage of product amplified.</p>
 <p>If E &gt; 1, the amount of PCR product is more than doubling each PCR cycle. This is often due to primer-dimers or other issues with multiple amplicons. If E &lt; 1, the PCR product is doubling more slowly than once per PCR cycle. This could be due to primer secondary structure, non-optimal melting temperature, primer saturation, or difficult templates. In general, E-values between 0.9 and 1.1 are acceptable.</p>
 <p>To test the primers over a large enough concentration range, each dilution should be at least a factor of two, and three to five dilutions should be used. For certain targets, the reverse transcription reaction conditions and dilution factors may need to be adjusted to keep the highest Ct values under 30. Additionally, optimal primer concentrations may vary, but in general a final concentration between 0.5-1.0µM gives good results.</p>
 <p><code class="docutils literal notranslate"><span class="pre">efficiency()</span></code> uses linear regression to determine the equation of the line of best fit, then uses the following equation to calculate efficiency:</p>
